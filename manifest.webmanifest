@@ -1,0 +1,1 @@
+{"name":"Opponent Scout - Volleyball Analytics","short_name":"Opponent Scout","description":"iPad向け相手チーム専用バレーボール分析アプリ","start_url":"./","scope":"./","display":"standalone","orientation":"landscape","background_color":"#07131b","theme_color":"#07131b","icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
