@@ -127,7 +127,7 @@ body.ipadStandalone header{top:0}
 <button class="btn on" id="createMatch">新しい試合を作成</button>
 </div>
 <div class="matchNote" id="matchManagerStatus">現在の試合の記録を表示しています。</div>
-<div class="field"><div class="label">相手校名</div><input id="oppName"></div><div class="field"><div class="label">背番号（カンマ区切り）</div><input id="nums"></div><button class="btn" id="apply">設定を反映</button><p class="small">記録はこのiPadのブラウザ内に自動保存されます。</p><div class="ipadHelp"><b>📱 iPadでアプリとして使う</b><p>Safariでこのページを開き、「共有」→「ホーム画面に追加」を選んでください。追加したアイコンから起動し、iPadを横向きにすると3列の記録画面になります。</p><p>左右の入力欄はそれぞれ上下にスクロールできます。記録は端末内に保存されるため、定期的に「JSONバックアップ」を保存してください。</p></div></div><div class="card"><div class="title">データ出力</div><div class="buttons"><button class="btn" id="csv">CSV出力</button><button class="btn" id="backup">現在の試合をJSON保存</button><button class="btn" id="backupAllMatches">全試合をJSON保存</button><label class="btn">JSON復元<input id="restore" type="file" accept="application/json" hidden></label><button class="btn err" id="wipe">現在の試合の記録を消去</button></div></div><div class="card"><div class="title">攻撃ボタンの配置・並び替え</div>
+<div class="field"><div class="label">相手校名</div><input id="oppName"></div><div class="field"><div class="label">背番号（カンマ区切り）</div><input id="nums"></div><button class="btn" id="apply">設定を反映</button><p class="small">記録はこのiPadのブラウザ内に自動保存されます。</p><div class="ipadHelp"><b>📱 iPadでアプリとして使う</b><p>Safariでこのページを開き、「共有」→「ホーム画面に追加」を選んでください。追加したアイコンから起動し、iPadを横向きにすると3列の記録画面になります。</p><p>左右の入力欄はそれぞれ上下にスクロールできます。記録は端末内に保存されるため、定期的に「JSONバックアップ」を保存してください。</p></div></div><div class="card"><div class="title">データ出力</div><div class="buttons"><button class="btn" id="csv">CSV出力</button><button class="btn" id="backup">現在の試合をJSON保存</button><button class="btn" id="backupAllMatches">全試合をJSON保存</button><label class="btn">全試合JSON読込<input id="importAllMatches" type="file" accept="application/json" hidden></label><label class="btn">JSON復元<input id="restore" type="file" accept="application/json" hidden></label><button class="btn err" id="wipe">現在の試合の記録を消去</button></div></div><div class="card"><div class="title">攻撃ボタンの配置・並び替え</div>
 <div class="attackColumnControl"><label for="attackColumns">横に並べるボタン数</label><select id="attackColumns"></select></div>
 <div class="small">1〜18個から選べます。画面に収まらないときは横にスクロールできます。</div>
 <div class="small">交換したいボタンを2つ順番にタップしてください。配置は自動保存されます。</div>
@@ -548,6 +548,29 @@ $('createMatch').onclick=()=>{
 };
 renderMatchSelector();
 $('oppName').value=db.settings.name;$('nums').value=db.settings.players.join(',');$('apply').onclick=()=>{db.settings.name=$('oppName').value.trim()||'相手チーム';db.settings.players=$('nums').value.split(',').map(x=>+x.trim()).filter((x,i,a)=>x&&a.indexOf(x)===i);st.player=db.settings.players[0]||1;const m=activeMatch();if(m){m.name=db.settings.name;saveMatchIndex()}saveDB();renderMatchSelector();controls();draw();renderAnalysis();renderPlayers()};function dl(name,text,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}$('backup').onclick=()=>dl('opponent_scout_backup.json',JSON.stringify(db,null,2),'application/json');
+$('importAllMatches').onchange=e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const payload=JSON.parse(reader.result);
+      if(payload.format!=='opponentScoutAllMatchesV1'||!Array.isArray(payload.matches)||!payload.matches.length||payload.matches.some(m=>!m.data||!m.data.settings||!Array.isArray(m.data.plays)))throw Error('形式が正しくありません');
+      if(!confirm(payload.matches.length+'試合を追加で読み込みますか？既存の試合は残ります。'))return;
+      const newEntries=payload.matches.map(m=>({id:matchId(),name:String(m.name||m.data.settings.name||'読み込み試合'),date:String(m.date||''),data:m.data}));
+      const written=[];
+      try{
+        newEntries.forEach(m=>{localStorage.setItem(MATCH_DATA_PREFIX+m.id,JSON.stringify(m.data));written.push(m.id)});
+        const updated={...matchIndex,matches:[...matchIndex.matches,...newEntries.map(({id,name,date})=>({id,name,date}))]};
+        localStorage.setItem(MATCH_INDEX_KEY,JSON.stringify(updated));
+        matchIndex=updated;
+        renderMatchSelector();
+        alert(newEntries.length+'試合を追加しました。試合の選択欄から切り替えられます。')
+      }catch(err){written.forEach(id=>localStorage.removeItem(MATCH_DATA_PREFIX+id));throw err}
+    }catch(err){console.error(err);alert('全試合JSONを読み込めませんでした。ファイル形式や保存容量を確認してください。')}
+    finally{e.target.value=''}
+  };
+  reader.readAsText(file)
+};
 $('backupAllMatches').onclick=()=>{
   try{
     const matches=matchIndex.matches.map(m=>{
