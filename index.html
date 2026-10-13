@@ -63,7 +63,7 @@ body.ipadStandalone header{top:0}
 .heat36>div strong{font-size:15px}
 .heat36>div.heatHot{outline:2px solid #ffdf7a;outline-offset:-2px}
 @media(max-width:1000px){.analysisView .btn{font-size:11px;padding:6px 8px}}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v26</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v27</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="title">高速入力</div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="buttons" id="players"></div><div class="label">② トス/攻撃種類</div><div class="buttons" id="attacks"></div><div class="label">③ 結果</div><div class="buttons" id="results"></div><div class="label">レセプション（必要なときだけ変更）</div><div class="buttons" id="recs"></div><div class="label">球質・線の形（必要なときだけ変更）</div><div class="buttons ballTypeButtons" id="ballTypes"></div><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><div class="stats"><div class="stat">攻撃本数<b id="nAtk">0</b></div><div class="stat">決定率<b id="killRate">0%</b></div><div class="stat">ミス率<b id="errRate">0%</b></div><div class="stat">被ブロック<b id="blkRate">0%</b></div></div></div>
 <div class="card right"><div class="serveBox"><div class="row"><div class="title">🏐 サーブ記録</div><span class="small">画面切替なし</span></div><div class="label">サーバー</div><div class="buttons" id="servePlayers"></div><div class="label">サーブ開始位置（エンドライン）</div><div class="serveStartButtons" id="serveStarts" aria-label="サーブ開始位置"></div><div class="label">サーブ種類</div><div class="buttons" id="serveTypes"></div><div class="label">結果（タップで自動保存）</div><div class="buttons serveResultButtons" id="serveResults"></div><button class="btn" id="serveUndo">↩ 直前のサーブを取消</button><div class="small" id="serveHint" role="status" aria-live="polite">サーバー・開始位置・種類を選び、結果をタップすると自動保存します。</div></div><div class="title recentTitle">直近の記録</div><div class="recent" id="recent"></div></div></div></section>
@@ -73,7 +73,14 @@ body.ipadStandalone header{top:0}
 <script>
 if(navigator.standalone===true||(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches))document.body.classList.add('ipadStandalone');
 const $=x=>document.getElementById(x), KEY='opponentScoutIPadDemoV1';const DEMO={settings:{name:'相手チーム',players:[1,2,3,4,5,6,7,8,9,10,11,12]},plays:[]};let db=JSON.parse(localStorage.getItem(KEY)||'null')||DEMO;db.plays.forEach(p=>{if(/^R[1-6]$/.test(p.rot))p.rot='S'+p.rot.slice(1)});localStorage.setItem(KEY,JSON.stringify(db));let st={set:1,rot:'S1',player:db.settings.players[0],type:'アタック',rec:'A',attack:'レフト',ballType:'強打',result:'決定'},pending=null,drag=null,reboundBase=null;const colors=['#ef4444','#1d8cff','#17a862','#f2b632','#ad62ff','#ff7b22','#00b8b8','#e94e9c','#7cc043','#8b6bff','#ff5252','#2ab7ca'];const DEFAULT_POS={ '2段':{x:.12,y:.22},'レフト':{x:.08,y:.12},'4つ':{x:.16,y:.28},'2番':{x:.84,y:.28},'AQ':{x:.42,y:.16},'BQ':{x:.28,y:.14},'CQ':{x:.66,y:.14},'オニ':{x:.82,y:.66},'BA':{x:.50,y:.76},'セ':{x:.52,y:.20},'ライト':{x:.92,y:.12},'RB':{x:.84,y:.82},'CB':{x:.50,y:.88},'LB':{x:.16,y:.82}};db.settings.attackPositions=db.settings.attackPositions||JSON.parse(JSON.stringify(DEFAULT_POS));db.settings.setStarts=db.settings.setStarts||{};db.settings.currentRotations=db.settings.currentRotations||{};st.rot=db.settings.currentRotations[st.set]||db.settings.setStarts[st.set]||null;const saveDB=()=>localStorage.setItem(KEY,JSON.stringify(db)),pct=(a,b)=>b?Math.round(a/b*100)+'%':'0%',color=p=>colors[db.settings.players.indexOf(+p)%colors.length]||'#fff',lineColor=result=>result==='決定'?'#ff5252':(result==='継続'||result==='被ブロック')?'#399dff':'#b9c4ca';
-function group(id,vals,key){let e=$(id);e.innerHTML='';vals.forEach(v=>{let b=document.createElement('button');b.className='btn'+(String(st[key])===String(v)?' on':'');b.textContent=key==='player'?'#'+v:v;b.onclick=()=>{if(key==='set'){st.set=v;st.rot=db.settings.currentRotations[v]||db.settings.setStarts[v]||null;pending=null;drag=null;reboundBase=null;group('rots',ROT_ORDER,'rot');updateRotationUI()}else if(key==='rot'){selectRotation(v)}else{st[key]=v}if(key==='attack'&&db.settings.attackPositions&&db.settings.attackPositions[v]){let q=db.settings.attackPositions[v];pending={a:{x:q.x,y:q.y},b:{x:q.x,y:q.y}};reboundBase=null;$('hint').textContent='スタート位置をセットしました。コート上の着地点まで線を引いてください。'}if(key==='result'&&v==='被ブロック'&&pending&&pending.a&&pending.b&&!(pending.a.x===pending.b.x&&pending.a.y===pending.b.y)){reboundBase={a:pending.a,b:pending.b};pending=null;$('hint').textContent='被ブロック：ブロック接触点から、跳ね返った位置まで線を引いてください。'}group(id,vals,key);draw()};e.appendChild(b)})}
+function group(id,vals,key){let e=$(id);e.innerHTML='';vals.forEach(v=>{let b=document.createElement('button');b.className='btn'+(String(st[key])===String(v)?' on':'');b.textContent=key==='player'?'#'+v:v;b.onclick=()=>{if(key==='set'){st.set=v;st.rot=db.settings.currentRotations[v]||db.settings.setStarts[v]||null;pending=null;drag=null;reboundBase=null;group('rots',ROT_ORDER,'rot');updateRotationUI()}else if(key==='rot'){selectRotation(v)}else{st[key]=v}if(key==='attack'&&db.settings.attackPositions&&db.settings.attackPositions[v]){let q=db.settings.attackPositions[v];pending={a:{x:q.x,y:q.y},b:{x:q.x,y:q.y}};reboundBase=null;$('hint').textContent='スタート位置をセットしました。コート上の着地点まで線を引いてください。'}if(key==='result'){
+  if(v==='被ブロック'){
+    if(pending&&pending.a&&pending.b&&!(pending.a.x===pending.b.x&&pending.a.y===pending.b.y)){
+      reboundBase={a:pending.a,b:pending.b};pending=null
+    }else{reboundBase=null;pending=null}
+    $('hint').textContent=inputMode==='tap'?'被ブロック① ネット付近のブロック接触点をタップ → ② 跳ね返った場所をタップで自動保存':'被ブロック① 打点からブロック位置へ線 → ② 折り返し先へ線 → 保存'
+  }else{reboundBase=null;if(pending&&pending.c)pending=null}
+}group(id,vals,key);draw()};e.appendChild(b)})}
 let serveSt={player:db.settings.players[0],serveStart:'中央',serveType:'ジャンフロ',result:'イン'};function serveGroup(id,vals,key){let e=$(id);if(!e)return;e.innerHTML='';vals.forEach(v=>{let b=document.createElement('button');b.className='btn'+(String(serveSt[key])===String(v)?' on':'');b.textContent=key==='player'?'#'+v:v;if(key==='result')b.dataset.result=v;b.onclick=()=>{serveSt[key]=v;serveGroup(id,vals,key);if(key==='result')saveServePlay()};e.appendChild(b)})}function serveControls(){if(!db.settings.players.includes(serveSt.player))serveSt.player=db.settings.players[0];serveGroup('servePlayers',db.settings.players,'player');serveGroup('serveStarts',['左','中央','右'],'serveStart');serveGroup('serveTypes',['ジャンフロ','ジャンプ','ハイブリット','フローター'],'serveType');serveGroup('serveResults',['イン','エース','ミス'],'result')}
 const ROT_ORDER=['S1','S6','S5','S4','S3','S2'];
 function updateRotationUI(){let start=db.settings.setStarts[st.set],note=$('rotationNote');note.textContent=start?'SET'+st.set+' 開始：'+start+' ／ 現在：'+(st.rot||'未選択'):'SET'+st.set+' の開始ローテを S1〜S6 から選択';$('nextRot').disabled=!st.rot;$('setStart').disabled=!st.rot;$('setStart').textContent=start?'開始位置を変更':'この位置でセット開始'}
@@ -100,14 +107,62 @@ let inputMode='tap';
 const ZONE_ROWS=[[4,3,2],[7,8,9],[5,6,1]];
 function zone36FromCell(r,c){let zr=Math.floor(r/2),zc=Math.floor(c/2),z=ZONE_ROWS[zr][zc],lr=r%2,lc=c%2,letter=lr===0?(lc===0?'C':'B'):(lc===0?'D':'A');return String(z)+letter}
 function zone36(p){if(!p)return '-';let x=Math.max(0,Math.min(.999999,p.x)),ly=Math.max(0,Math.min(.999999,(p.y-.5)/.5)),c=Math.floor(x*6),r=Math.floor(ly*6);return zone36FromCell(r,c)}
-function renderLandingGrid(){let g=$('landingGrid');if(!g)return;g.innerHTML='';for(let r=0;r<6;r++)for(let cc=0;cc<6;cc++){let d=document.createElement('div'),label=zone36FromCell(r,cc);d.className='landingCell'+(cc===1||cc===3?' majorR':'')+(r===1||r===3?' majorB':'');d.textContent=label;d.dataset.label=label;d.onclick=e=>{e.preventDefault();e.stopPropagation();if(inputMode!=='tap')return;let start=null;if(pending&&pending.a&&pending.b&&pending.a.x===pending.b.x&&pending.a.y===pending.b.y)start=pending.a;else if(db.settings.attackPositions&&db.settings.attackPositions[st.attack]){let q=db.settings.attackPositions[st.attack];start={x:q.x,y:q.y}}if(!start){$('hint').textContent='先に攻撃種類を選んでください。';return}let target={x:(cc+.5)/6,y:.5+(r+.5)/12};pending={a:{x:start.x,y:start.y},b:target,zone36:label};reboundBase=null;g.querySelectorAll('.landingCell').forEach(x=>x.classList.toggle('sel',x===d));saveAttackPlay(true)};g.appendChild(d)}}
-function setInputMode(m){inputMode=m;court.classList.toggle('freeMode',m==='free');$('tapMode').classList.toggle('on',m==='tap');$('freeMode').classList.toggle('on',m==='free');$('hint').textContent=m==='tap'?'④ 着地点をタップすると自動保存します。':'フリー線モード：打点から着地点へ線を引き、「フリー線を保存」を押してください。'}
+function blockStart(){
+  const p=db.settings.attackPositions&&db.settings.attackPositions[st.attack];
+  return p?{x:p.x,y:p.y}:null
+}
+function tapBlocked(p){
+  if(!st.rot){$('hint').textContent='先に開始ローテを選んでください。';return}
+  if(!reboundBase){
+    const a=blockStart();if(!a){$('hint').textContent='先に攻撃種類を選んでください。';return}
+    reboundBase={a,b:p};pending=null;
+    $('hint').textContent='被ブロック② 跳ね返った先をタップすると自動保存します';
+    draw();return
+  }
+  pending={a:reboundBase.a,b:reboundBase.b,c:p,zone36:zone36(p)};
+  reboundBase=null;saveAttackPlay(true)
+}
+function renderLandingGrid(){let g=$('landingGrid');if(!g)return;g.innerHTML='';for(let r=0;r<6;r++)for(let cc=0;cc<6;cc++){let d=document.createElement('div'),label=zone36FromCell(r,cc);d.className='landingCell'+(cc===1||cc===3?' majorR':'')+(r===1||r===3?' majorB':'');d.textContent=label;d.dataset.label=label;d.onclick=e=>{e.preventDefault();e.stopPropagation();if(inputMode!=='tap')return;let target={x:(cc+.5)/6,y:.5+(r+.5)/12};if(st.result==='被ブロック'){tapBlocked(target);return}let start=null;if(pending&&pending.a&&pending.b&&pending.a.x===pending.b.x&&pending.a.y===pending.b.y)start=pending.a;else if(db.settings.attackPositions&&db.settings.attackPositions[st.attack]){let q=db.settings.attackPositions[st.attack];start={x:q.x,y:q.y}}if(!start){$('hint').textContent='先に攻撃種類を選んでください。';return}pending={a:{x:start.x,y:start.y},b:target,zone36:label};reboundBase=null;g.querySelectorAll('.landingCell').forEach(x=>x.classList.toggle('sel',x===d));saveAttackPlay(true)};g.appendChild(d)}}
+function setInputMode(m){inputMode=m;pending=null;drag=null;reboundBase=null;court.classList.toggle('freeMode',m==='free');$('tapMode').classList.toggle('on',m==='tap');$('freeMode').classList.toggle('on',m==='free');$('hint').textContent=st.result==='被ブロック'?(m==='tap'?'被ブロック① ブロック接触点 → ② 折り返し先をタップして自動保存':'被ブロック① ブロック位置まで線 → ② 折り返し先まで線 → 保存'):(m==='tap'?'④ 着地点をタップすると自動保存します。':'フリー線モード：打点から着地点へ線を引き、「フリー線を保存」を押してください。')}
 $('tapMode').onclick=()=>setInputMode('tap');$('freeMode').onclick=()=>setInputMode('free');renderLandingGrid();
-court.onpointerdown=e=>{if(inputMode==='tap'&&!reboundBase)return;court.setPointerCapture(e.pointerId);let p=pos(e,court);if(reboundBase){drag={a:reboundBase.b,b:p,rebound:true};return}let preset=(pending&&pending.a&&pending.b&&pending.a.x===pending.b.x&&pending.a.y===pending.b.y)?pending.a:null;drag={a:preset||p,b:p};pending=null};court.onpointermove=e=>{if(drag){drag.b=pos(e,court);draw()}};court.onpointerup=e=>{if(!drag)return;drag.b=pos(e,court);if(drag.rebound&&reboundBase){pending={a:reboundBase.a,b:reboundBase.b,c:drag.b};reboundBase=null;$('hint').textContent='被ブロックの折り返し線を確認 → 保存';}else{pending=drag;$('hint').textContent='線を確認 → 結果を選んで保存'}drag=null;draw()};
-function current(){return db.plays.filter(p=>p.set==st.set&&p.rot===st.rot)}function draw(){if(!resize(cv,ctx))return;ctx.clearRect(0,0,cv.clientWidth,cv.clientHeight);current().forEach(p=>p.a&&bendArrow(ctx,p.a,p.b,p.c,lineColor(p.result),p.result==='決定'?3.5:2.6,.85,p.ballType||'強打'));if(reboundBase){arrow(ctx,reboundBase.a,reboundBase.b,lineColor('被ブロック'),4,1,st.ballType);if(drag&&drag.rebound)arrow(ctx,reboundBase.b,drag.b,lineColor('被ブロック'),4,1,st.ballType)}else{if(pending)bendArrow(ctx,pending.a,pending.b,pending.c,lineColor(st.result),4,1,st.ballType);if(drag)arrow(ctx,drag.a,drag.b,lineColor(st.result),4,1,st.ballType)};let a=current().filter(p=>p.type==='アタック'),k=a.filter(p=>p.result==='決定').length,e=a.filter(p=>p.result==='ミス').length,b=a.filter(p=>p.result==='被ブロック').length;$('nAtk').textContent=a.length;$('killRate').textContent=pct(k,a.length);$('errRate').textContent=pct(e,a.length);$('blkRate').textContent=pct(b,a.length);$('count').textContent=db.plays.length;renderRecent();$('state').textContent=`SET${st.set} ${st.rot||'未設定'} #${st.player}`}
+court.onpointerdown=e=>{
+  if(inputMode==='tap'){
+    if(st.result!=='被ブロック')return;
+    // The 36-zone cells handle their own taps; upper court taps come here.
+    if(e.target.closest&&e.target.closest('.landingCell'))return;
+    court.setPointerCapture(e.pointerId);
+    return
+  }
+  court.setPointerCapture(e.pointerId);
+  const p=pos(e,court);
+  if(reboundBase){drag={a:reboundBase.b,b:p,rebound:true};return}
+  const preset=blockStart();
+  const a=st.result==='被ブロック'&&preset?preset:
+    pending&&pending.a&&pending.b&&pending.a.x===pending.b.x&&pending.a.y===pending.b.y?pending.a:p;
+  drag={a,b:p};pending=null
+};
+court.onpointermove=e=>{if(drag){drag.b=pos(e,court);draw()}};
+court.onpointerup=e=>{
+  if(inputMode==='tap'){
+    if(st.result==='被ブロック'&&!(e.target.closest&&e.target.closest('.landingCell')))tapBlocked(pos(e,court));
+    return
+  }
+  if(!drag)return;
+  drag.b=pos(e,court);
+  if(drag.rebound&&reboundBase){
+    pending={a:reboundBase.a,b:reboundBase.b,c:drag.b,zone36:zone36(drag.b)};
+    reboundBase=null;
+    $('hint').textContent='被ブロックの折り返し線を確認 → フリー線を保存'
+  }else if(st.result==='被ブロック'){
+    reboundBase={a:drag.a,b:drag.b};pending=null;
+    $('hint').textContent='被ブロック② ブロック接触点から跳ね返った場所へ直線を引いてください'
+  }else{pending=drag;$('hint').textContent='線を確認 → 結果を選んで保存'}
+  drag=null;draw()
+};
+function current(){return db.plays.filter(p=>p.set==st.set&&p.rot===st.rot)}function draw(){if(!resize(cv,ctx))return;ctx.clearRect(0,0,cv.clientWidth,cv.clientHeight);current().forEach(p=>p.a&&bendArrow(ctx,p.a,p.b,p.c,lineColor(p.result),p.result==='決定'?3.5:2.6,.85,p.result==='被ブロック'?'強打':(p.ballType||'強打')));if(reboundBase){arrow(ctx,reboundBase.a,reboundBase.b,lineColor('被ブロック'),4,1,'強打');if(drag&&drag.rebound)arrow(ctx,reboundBase.b,drag.b,lineColor('被ブロック'),4,1,'強打')}else{if(pending)bendArrow(ctx,pending.a,pending.b,pending.c,lineColor(st.result),4,1,st.result==='被ブロック'?'強打':st.ballType);if(drag)arrow(ctx,drag.a,drag.b,lineColor(st.result),4,1,st.ballType)};let a=current().filter(p=>p.type==='アタック'),k=a.filter(p=>p.result==='決定').length,e=a.filter(p=>p.result==='ミス').length,b=a.filter(p=>p.result==='被ブロック').length;$('nAtk').textContent=a.length;$('killRate').textContent=pct(k,a.length);$('errRate').textContent=pct(e,a.length);$('blkRate').textContent=pct(b,a.length);$('count').textContent=db.plays.length;renderRecent();$('state').textContent=`SET${st.set} ${st.rot||'未設定'} #${st.player}`}
 function saveServePlay(){if(!st.rot){$('serveHint').textContent='先にこのセットの開始ローテを選んでください。サーブはまだ保存されていません。';return false}const p={id:Date.now()+Math.random(),ts:new Date().toISOString(),set:st.set,rot:st.rot,player:serveSt.player,type:'サーブ',rec:'-',attack:serveSt.serveType,serveType:serveSt.serveType,serveStart:serveSt.serveStart,result:serveSt.result,a:null,b:null};db.plays.push(p);saveDB();draw();renderAnalysis();renderPlayers();$('serveHint').textContent='✓ 自動保存：#'+p.player+' '+p.serveStart+'から '+p.serveType+' / '+p.result+'（もう一度結果を押すと次のサーブを記録）';return true}
 $('serveUndo').onclick=()=>{const i=db.plays.findLastIndex?db.plays.findLastIndex(p=>p.type==='サーブ'):(()=>{for(let j=db.plays.length-1;j>=0;j--)if(db.plays[j].type==='サーブ')return j;return -1})();if(i<0){$('serveHint').textContent='取り消せるサーブ記録がありません。';return}const p=db.plays.splice(i,1)[0];saveDB();draw();renderAnalysis();renderPlayers();$('serveHint').textContent='↩ サーブを取消：#'+p.player+' '+p.result}
-function saveAttackPlay(auto=false){if(!st.rot){$('hint').textContent='先にこのセットの開始ローテを選んでください。';pending=null;draw();return false}if(!pending||!pending.a||!pending.b){$('hint').textContent='先にコートへコースを描いてください。';return false}const p={...st,id:Date.now()+Math.random(),ts:new Date().toISOString(),a:pending.a,b:pending.b,c:pending.c||null,zone36:pending.zone36||zone36(pending.b)};db.plays.push(p);pending=null;drag=null;reboundBase=null;document.querySelectorAll('.landingCell.sel').forEach(x=>x.classList.remove('sel'));saveDB();draw();renderAnalysis();renderPlayers();$('hint').textContent=(auto?'✓ 自動保存：':'✓ 保存：')+' #'+p.player+' '+p.attack+' '+p.result+' → '+p.zone36+' ／ 次の着地点をタップできます';return true}
+function saveAttackPlay(auto=false){if(!st.rot){$('hint').textContent='先にこのセットの開始ローテを選んでください。';pending=null;draw();return false}if(!pending||!pending.a||!pending.b||(st.result==='被ブロック'&&!pending.c)){$('hint').textContent=st.result==='被ブロック'?'被ブロックは折り返し先まで指定してください。':'先にコートへコースを描いてください。';return false}const p={...st,id:Date.now()+Math.random(),ts:new Date().toISOString(),a:pending.a,b:pending.b,c:pending.c||null,zone36:pending.zone36||zone36(pending.b)};db.plays.push(p);pending=null;drag=null;reboundBase=null;document.querySelectorAll('.landingCell.sel').forEach(x=>x.classList.remove('sel'));saveDB();draw();renderAnalysis();renderPlayers();$('hint').textContent=(auto?'✓ 自動保存：':'✓ 保存：')+' #'+p.player+' '+p.attack+' '+p.result+' → '+p.zone36+' ／ 次の着地点をタップできます';return true}
 $('save').onclick=()=>saveAttackPlay(false);
 $('undo').onclick=()=>{if(!db.plays.length)return;db.plays.pop();saveDB();draw();renderAnalysis();renderPlayers();$('hint').textContent='直前のプレーを取り消しました。'};$('clear').onclick=()=>{pending=null;drag=null;reboundBase=null;document.querySelectorAll('.landingCell.sel').forEach(x=>x.classList.remove('sel'));draw()};
 function renderRecent(){$('recent').innerHTML=db.plays.slice(-35).reverse().map(p=>`<div class="rec"><div class="row"><b style="color:${color(p.player)}">#${p.player} ${p.rot}</b><span>${p.result}</span></div><span>${p.type==='サーブ'?'サーブ / '+(p.serveStart?p.serveStart+'から / ':'')+(p.serveType||p.attack||'-'):p.attack+' / '+(p.ballType||'強打')+' / '+(p.zone36||zone36(p.b))+' / Rec:'+p.rec}</span></div>`).join('')||'<div class="small">まだ記録がありません。</div>'}
@@ -165,7 +220,7 @@ function taperedAnalysisArrow(x,a,b,maxWidth,col,ballType='強打'){
 }
 function drawAnalysisCourses(x,plays){
   if(analysisCourseMode==='all'){
-    plays.forEach(p=>p.a&&p.b&&bendArrow(x,p.a,p.b,p.c,lineColor(p.result),2.6,.85,p.ballType||'強打'));
+    plays.forEach(p=>p.a&&p.b&&bendArrow(x,p.a,p.b,p.c,lineColor(p.result),2.6,.85,p.result==='被ブロック'?'強打':(p.ballType||'強打')));
     return
   }
   // Course frequency is the total for attack start + landing zone, regardless of result.
@@ -206,7 +261,7 @@ function drawAnalysisCourses(x,plays){
     if(route.n>=2)routeBadges.push({n:route.n,start,center})
   });
   // Blocked attacks still show their two-part rebound course as individual blue paths.
-  plays.filter(p=>p.result==='被ブロック'&&p.a&&p.b).forEach(p=>bendArrow(x,p.a,p.b,p.c,lineColor(p.result),2.1,.65,p.ballType||'強打'));
+  plays.filter(p=>p.result==='被ブロック'&&p.a&&p.b).forEach(p=>bendArrow(x,p.a,p.b,p.c,lineColor(p.result),2.1,.65,'強打'));
   const W=x.canvas.clientWidth,H=x.canvas.clientHeight;
   // Count tags on the course itself, separate from landing-zone total badges.
   routeBadges.forEach(({n,start,center})=>{
