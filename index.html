@@ -70,7 +70,7 @@ body.ipadStandalone header{top:0}
 .heat36>div strong{font-size:15px}
 .heat36>div.heatHot{outline:2px solid #ffdf7a;outline-offset:-2px}
 @media(max-width:1000px){.analysisView .btn{font-size:11px;padding:6px 8px}}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v32</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v33</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="title">高速入力</div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="buttons" id="players"></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="label">③ 結果</div><div class="buttons" id="results"></div><div class="label">レセプション（必要なときだけ変更）</div><div class="buttons" id="recs"></div><div class="label">球質・線の形（必要なときだけ変更）</div><div class="buttons ballTypeButtons" id="ballTypes"></div><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><div class="stats"><div class="stat">攻撃本数<b id="nAtk">0</b></div><div class="stat">決定率<b id="killRate">0%</b></div><div class="stat">ミス率<b id="errRate">0%</b></div><div class="stat">被ブロック<b id="blkRate">0%</b></div></div></div>
 <div class="card right"><div class="serveBox"><div class="row"><div class="title">🏐 サーブ記録</div><span class="small">画面切替なし</span></div><div class="label">サーバー</div><div class="buttons" id="servePlayers"></div><div class="label">サーブ開始位置（エンドライン）</div><div class="serveStartButtons" id="serveStarts" aria-label="サーブ開始位置"></div><div class="label">サーブ種類</div><div class="buttons" id="serveTypes"></div><div class="label">結果（タップで自動保存）</div><div class="buttons serveResultButtons" id="serveResults"></div><button class="btn" id="serveUndo">↩ 直前のサーブを取消</button><div class="small" id="serveHint" role="status" aria-live="polite">サーバー・開始位置・種類を選び、結果をタップすると自動保存します。</div></div><div class="title recentTitle">直近の記録</div><div class="recent" id="recent"></div></div></div></section>
@@ -78,7 +78,24 @@ body.ipadStandalone header{top:0}
 <section id="players" class="page"><div class="card"><div class="title">相手選手別 攻撃成績</div><div class="scroll"><table><thead><tr><th>選手</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th><th>Eff%</th><th>最多R</th><th>最多着地</th></tr></thead><tbody id="ptable"></tbody></table></div></div>
 <div class="card" style="margin-top:10px"><div class="title">選手別 × 攻撃種類の内訳</div>
 <div class="small">タテ・Sブロ・Mブロ・Lブロを含む全攻撃種類を集計します。記録がある攻撃を表示します。</div>
-<div class="scroll"><table><thead><tr><th>選手</th><th>攻撃種類</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th></tr></thead><tbody id="playerAttackTable"></tbody></table></div></div></div></section>
+<div class="scroll"><table><thead><tr><th>選手</th><th>攻撃種類</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th></tr></thead><tbody id="playerAttackTable"></tbody></table></div></div>
+<div class="card" style="margin-top:10px">
+<div class="title">ローテ別 × 攻撃種類</div>
+<div class="small">ローテごとに、どの攻撃が何本あり、何本決まったかを比較できます。</div>
+<div class="scroll"><table><thead><tr><th>ローテ</th><th>攻撃種類</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th><th>Eff%</th></tr></thead><tbody id="rotationAttackTable"></tbody></table></div>
+</div>
+<div class="card" style="margin-top:10px">
+<div class="title">選手 × ローテ × 攻撃種類 詳細集計</div>
+<div class="small">選手・セット・ローテを選んで絞り込めます。集計は保存済みの攻撃記録から自動更新します。</div>
+<div class="row" style="flex-wrap:wrap;gap:7px;margin:10px 0">
+<label>選手 <select id="playerDetailPlayer"></select></label>
+<label>セット <select id="playerDetailSet"><option value="all">全セット</option><option value="1">SET1</option><option value="2">SET2</option><option value="3">SET3</option><option value="4">SET4</option><option value="5">SET5</option></select></label>
+<label>ローテ <select id="playerDetailRot"><option value="all">全ローテ</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select></label>
+<button class="btn" id="exportPlayerDetail">この集計をCSV出力</button>
+</div>
+<div class="small" id="playerDetailSummary"></div>
+<div class="scroll"><table><thead><tr><th>選手</th><th>ローテ</th><th>攻撃種類</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th><th>Eff%</th></tr></thead><tbody id="playerDetailTable"></tbody></table></div>
+</div></div></section>
 <section id="settings" class="page"><div class="settings"><div class="card"><div class="title">試合設定</div><div class="field"><div class="label">相手校名</div><input id="oppName"></div><div class="field"><div class="label">背番号（カンマ区切り）</div><input id="nums"></div><button class="btn" id="apply">設定を反映</button><p class="small">記録はこのiPadのブラウザ内に自動保存されます。</p><div class="ipadHelp"><b>📱 iPadでアプリとして使う</b><p>Safariでこのページを開き、「共有」→「ホーム画面に追加」を選んでください。追加したアイコンから起動し、iPadを横向きにすると3列の記録画面になります。</p><p>左右の入力欄はそれぞれ上下にスクロールできます。記録は端末内に保存されるため、定期的に「JSONバックアップ」を保存してください。</p></div></div><div class="card"><div class="title">データ出力</div><div class="buttons"><button class="btn" id="csv">CSV出力</button><button class="btn" id="backup">JSONバックアップ</button><label class="btn">JSON復元<input id="restore" type="file" accept="application/json" hidden></label><button class="btn err" id="wipe">全データ消去</button></div></div><div class="card"><div class="title">攻撃ボタンの配置・並び替え</div>
 <div class="attackColumnControl"><label for="attackColumns">横に並べるボタン数</label><select id="attackColumns"></select></div>
 <div class="small">1〜18個から選べます。画面に収まらないときは横にスクロールできます。</div>
@@ -320,6 +337,55 @@ function renderAnalysis(){if(!$('analysis').classList.contains('on'))return;let 
   }
 })}let all=filtered(),c36={};all.filter(p=>p.result!=='被ブロック'&&p.b).forEach(p=>{let z=p.zone36||zone36(p.b);c36[z]=(c36[z]||0)+1});let mx=Math.max(1,...Object.values(c36));let labels=[];for(let rr=0;rr<6;rr++)for(let cc=0;cc<6;cc++)labels.push(zone36FromCell(rr,cc));$('heat').innerHTML=labels.map(z=>{const n=c36[z]||0,hot=n>0&&n===mx,opacity=n?(.18+.72*n/mx):.06;return `<div class="${hot?'heatHot':''}" style="background:rgba(239,68,68,${opacity});color:${n&&n/mx>.58?'#fff':'#e6f2f8'}"><span>${z}</span><strong>${n}</strong></div>`}).join('');let byAtk={};all.forEach(p=>byAtk[p.attack]=(byAtk[p.attack]||0)+1);let top=Object.entries(byAtk).sort((a,b)=>b[1]-a[1])[0];let kills=all.filter(p=>p.result==='決定');let kz=Array(9).fill(0);kills.forEach(p=>kz[zone(p.b)-1]++);let tz=kz.indexOf(Math.max(...kz))+1;$('summary').innerHTML=`<p><b>対象：</b>${all.length}本</p><p><b>最多攻撃：</b>${top?top[0]+' '+top[1]+'本':'データなし'}</p><p><b>決定率：</b>${pct(kills.length,all.length)}</p><p><b>決定球の最多着地点：</b>${kills.length?'Zone '+tz:'データなし'}</p><p class="small">上のフィルタで「#7 × S3 × Aパス × レフト」などに絞れます。</p>`}
 $('courseGrouped').onclick=()=>{analysisCourseMode='grouped';$('courseGrouped').classList.add('on');$('courseAll').classList.remove('on');renderAnalysis()};$('courseAll').onclick=()=>{analysisCourseMode='all';$('courseAll').classList.add('on');$('courseGrouped').classList.remove('on');renderAnalysis()};['fSet','fPlayer','fRec','fAttack','fResult'].forEach(id=>$(id).onchange=renderAnalysis);
+const attackResults=['決定','継続','ミス','被ブロック'];
+function attackAggregate(plays,keys){
+  const map=new Map();
+  plays.forEach(p=>{
+    if(p.type!=='アタック')return;
+    const values=keys.map(k=>String(p[k]??'-'));
+    const key=JSON.stringify(values);
+    if(!map.has(key))map.set(key,{values,attempts:0,kills:0,continues:0,errors:0,blocks:0});
+    const row=map.get(key);row.attempts++;
+    if(p.result==='決定')row.kills++;
+    else if(p.result==='継続')row.continues++;
+    else if(p.result==='ミス')row.errors++;
+    else if(p.result==='被ブロック')row.blocks++
+  });
+  return [...map.values()]
+}
+function attackAggregateCells(row){
+  return `<td>${row.attempts}</td><td>${row.kills}</td><td>${row.continues}</td><td>${row.errors}</td><td>${row.blocks}</td><td>${pct(row.kills,row.attempts)}</td><td>${pct(row.kills-row.errors-row.blocks,row.attempts)}</td>`
+}
+function attackOrderRank(name){
+  const i=db.settings.attackOrder.indexOf(name);return i<0?999:i
+}
+function renderPlayerRotationDetails(){
+  const players=$('playerDetailPlayer'),set=$('playerDetailSet'),rot=$('playerDetailRot');
+  const previous=players.value||'all';
+  const available=[...new Set([...db.settings.players,...db.plays.filter(p=>p.type==='アタック').map(p=>p.player)])].filter(n=>n!=null).sort((a,b)=>Number(a)-Number(b));
+  players.innerHTML='<option value="all">全選手</option>';
+  available.forEach(n=>{const option=document.createElement('option');option.value=String(n);option.textContent='#'+n;players.appendChild(option)});
+  players.value=available.some(n=>String(n)===previous)?previous:'all';
+  const plays=db.plays.filter(p=>p.type==='アタック'&&(players.value==='all'||String(p.player)===players.value)&&(set.value==='all'||String(p.set)===set.value)&&(rot.value==='all'||p.rot===rot.value));
+  const rows=attackAggregate(plays,['player','rot','attack']).sort((a,b)=>Number(a.values[0])-Number(b.values[0])||String(a.values[1]).localeCompare(String(b.values[1]))||attackOrderRank(a.values[2])-attackOrderRank(b.values[2]));
+  $('playerDetailTable').innerHTML=rows.map(r=>`<tr><td><b>#${r.values[0]}</b></td><td>${r.values[1]}</td><td>${r.values[2]}</td>${attackAggregateCells(r)}</tr>`).join('')||'<tr><td colspan="10">該当する攻撃記録がありません。</td></tr>';
+  const kills=plays.filter(p=>p.result==='決定').length,errors=plays.filter(p=>p.result==='ミス').length,blocks=plays.filter(p=>p.result==='被ブロック').length;
+  $('playerDetailSummary').textContent=`対象 ${plays.length}本 ／ 決定 ${kills}本 ／ 決定率 ${pct(kills,plays.length)} ／ 攻撃効果率 ${pct(kills-errors-blocks,plays.length)}`;
+  return rows
+}
+function renderRotationAttackDetails(){
+  const rows=attackAggregate(db.plays,['rot','attack']).sort((a,b)=>String(a.values[0]).localeCompare(String(b.values[0]))||attackOrderRank(a.values[1])-attackOrderRank(b.values[1]));
+  $('rotationAttackTable').innerHTML=rows.map(r=>`<tr><td><b>${r.values[0]}</b></td><td>${r.values[1]}</td>${attackAggregateCells(r)}</tr>`).join('')||'<tr><td colspan="9">攻撃記録がまだありません。</td></tr>'
+}
+['playerDetailPlayer','playerDetailSet','playerDetailRot'].forEach(id=>$(id).addEventListener('change',renderPlayerRotationDetails));
+$('exportPlayerDetail').onclick=()=>{
+  const rows=renderPlayerRotationDetails();
+  const data=[['選手','ローテ','攻撃種類','打数','決定','継続','ミス','被ブロック','決定率','攻撃効果率'],
+    ...rows.map(r=>['#'+r.values[0],r.values[1],r.values[2],r.attempts,r.kills,r.continues,r.errors,r.blocks,pct(r.kills,r.attempts),pct(r.kills-r.errors-r.blocks,r.attempts)])];
+  const csv='\ufeff'+data.map(row=>row.map(value=>'"'+String(value).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const link=document.createElement('a'),url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  link.href=url;link.download='opponent_scout_player_rotation_attacks.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)
+};
 function renderPlayers(){let h='',detail='';db.settings.players.forEach(n=>{let a=db.plays.filter(p=>p.player==n&&p.type==='アタック'),k=a.filter(p=>p.result==='決定').length,c=a.filter(p=>p.result==='継続').length,e=a.filter(p=>p.result==='ミス').length,b=a.filter(p=>p.result==='被ブロック').length;let rc={};a.forEach(p=>rc[p.rot]=(rc[p.rot]||0)+1);let tr=Object.entries(rc).sort((x,y)=>y[1]-x[1])[0]?.[0]||'-';let zc=Array(9).fill(0);a.forEach(p=>{if(p.b)zc[zone(p.b)-1]++});let z=a.length?'Z'+(zc.indexOf(Math.max(...zc))+1):'-';h+=`<tr><td style="color:${color(n)}"><b>#${n}</b></td><td>${a.length}</td><td>${k}</td><td>${c}</td><td>${e}</td><td>${b}</td><td>${pct(k,a.length)}</td><td>${pct(k-e-b,a.length)}</td><td>${tr}</td><td>${z}</td></tr>`;
 const names=[...db.settings.attackOrder,...new Set(a.map(p=>p.attack).filter(name=>name&&!db.settings.attackOrder.includes(name)))];
 names.forEach(name=>{
@@ -328,7 +394,7 @@ names.forEach(name=>{
     errors=subset.filter(p=>p.result==='ミス').length,blocks=subset.filter(p=>p.result==='被ブロック').length;
   detail+=`<tr><td style="color:${color(n)}"><b>#${n}</b></td><td>${name}</td><td>${subset.length}</td><td>${kills}</td><td>${continues}</td><td>${errors}</td><td>${blocks}</td><td>${pct(kills,subset.length)}</td></tr>`
 })
-});$('ptable').innerHTML=h;$('playerAttackTable').innerHTML=detail||'<tr><td colspan="8">攻撃記録がまだありません。</td></tr>'}
+});$('ptable').innerHTML=h;$('playerAttackTable').innerHTML=detail||'<tr><td colspan="8">攻撃記録がまだありません。</td></tr>';renderRotationAttackDetails();renderPlayerRotationDetails()}
 $('oppName').value=db.settings.name;$('nums').value=db.settings.players.join(',');$('apply').onclick=()=>{db.settings.name=$('oppName').value.trim()||'相手チーム';db.settings.players=$('nums').value.split(',').map(x=>+x.trim()).filter((x,i,a)=>x&&a.indexOf(x)===i);st.player=db.settings.players[0]||1;saveDB();controls();draw();renderAnalysis();renderPlayers()};function dl(name,text,type){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}$('backup').onclick=()=>dl('opponent_scout_backup.json',JSON.stringify(db,null,2),'application/json');$('csv').onclick=()=>{let rows=[['time','set','rotation','player','type','reception','attack','ballType','serveStart','result','startX','startY','endX','endY'],...db.plays.map(p=>[p.ts,p.set,p.rot,p.player,p.type,p.rec,p.attack,p.type==='サーブ'?'':(p.ballType||'強打'),p.serveStart||'',p.result,p.a?.x??'',p.a?.y??'',p.b?.x??'',p.b?.y??''])];dl('opponent_scout.csv','\ufeff'+rows.map(r=>r.join(',')).join('\n'),'text/csv')};$('restore').onchange=e=>{let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{db=JSON.parse(r.result);saveDB();location.reload()}catch{alert('JSONを読み込めませんでした')}};r.readAsText(f)};$('wipe').onclick=()=>{if(confirm('記録をすべて消去しますか？')){db.plays=[];saveDB();draw();renderAnalysis();renderPlayers()}};
 function applyAttackColumns(){
   const cols=db.settings.attackColumns;
