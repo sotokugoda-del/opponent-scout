@@ -16,7 +16,20 @@
 .analysis36Cell{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(255,255,255,.38);border-bottom:1px solid rgba(255,255,255,.38);color:rgba(255,255,255,.85);font-size:clamp(7px,.85vw,11px);font-weight:800;text-shadow:0 1px 2px #743500}
 .analysis36Cell.majorR{border-right:2px solid rgba(255,255,255,.82)}.analysis36Cell.majorB{border-bottom:2px solid rgba(255,255,255,.82)}
 .playerCourseCourt .analysis36Cell{font-size:10px}
-.landingGrid{position:absolute;left:0;right:0;top:50%;bottom:0;z-index:4;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);pointer-events:auto}.landingCell{border-right:1px solid rgba(255,255,255,.32);border-bottom:1px solid rgba(255,255,255,.32);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:rgba(255,255,255,.78);background:rgba(0,0,0,.025);touch-action:manipulation;user-select:none}.landingCell.majorR{border-right:2px solid rgba(255,255,255,.72)}.landingCell.majorB{border-bottom:2px solid rgba(255,255,255,.72)}.landingCell.sel{background:rgba(33,136,255,.38);color:#fff}.court.freeMode .landingGrid{pointer-events:none;opacity:.18}.heat36{grid-template-columns:repeat(6,1fr);gap:2px}.heat36 div{aspect-ratio:1.15;font-size:10px;line-height:1.1}.courtMode .btn{padding:5px 9px;font-size:11px}@media (orientation:landscape) and (min-width:1000px) and (max-height:900px){#record .courtMode{margin-bottom:3px}#record .courtMode .btn{padding:3px 7px;font-size:10px}}
+.landingGrid{position:absolute;left:0;right:0;top:50%;bottom:0;z-index:4;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(6,1fr);pointer-events:auto}.landingCell{border-right:1px solid rgba(255,255,255,.32);border-bottom:1px solid rgba(255,255,255,.32);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:rgba(255,255,255,.78);background:rgba(0,0,0,.025);touch-action:manipulation;user-select:none}.landingCell.majorR{border-right:2px solid rgba(255,255,255,.72)}.landingCell.majorB{border-bottom:2px solid rgba(255,255,255,.72)}.landingCell.sel{background:rgba(33,136,255,.38);color:#fff}.court.freeMode .landingGrid{pointer-events:none;opacity:.18}.setMixFilters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+.setMixFilters label{font-size:12px;display:flex;gap:5px;align-items:center}
+.setMixBars{display:grid;gap:11px;margin:10px 0}
+.setMixRow{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;gap:8px}
+.setMixSet{font-size:12px;font-weight:900}.setMixSet small{display:block;color:var(--mut);font-size:10px;font-weight:500}
+.setMixTrack{height:27px;display:flex;border-radius:5px;overflow:hidden;background:#27434f}
+.setMixSegment{height:100%;min-width:0;position:relative;border-right:1px solid #10242f;box-sizing:border-box}
+.setMixEmpty{display:flex;align-items:center;justify-content:center;font-size:11px;color:#a9c1cd;width:100%}
+.setMixLegend{display:flex;flex-wrap:wrap;gap:6px 12px;margin:11px 0}
+.setMixLegend span{font-size:11px;white-space:nowrap}.setMixLegend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.setMixTable td,.setMixTable th{white-space:nowrap}.setMixTable th:first-child,.setMixTable td:first-child{text-align:left;position:sticky;left:0;background:var(--p);z-index:1}
+.setMixDeltaUp{color:#ffb2a4;font-weight:900}.setMixDeltaDown{color:#a5e5ff;font-weight:900}
+.setMixSummary{line-height:1.7;font-size:12px;margin:9px 0}
+.heat36{grid-template-columns:repeat(6,1fr);gap:2px}.heat36 div{aspect-ratio:1.15;font-size:10px;line-height:1.1}.courtMode .btn{padding:5px 9px;font-size:11px}@media (orientation:landscape) and (min-width:1000px) and (max-height:900px){#record .courtMode{margin-bottom:3px}#record .courtMode .btn{padding:3px 7px;font-size:10px}}
 .rotationActions{display:flex;gap:5px;margin-top:5px}.rotationActions .btn{font-size:11px;padding:7px 5px}.rotationActions .nextRot{flex:1;background:#086d8d;border-color:#1793b5;font-size:14px;font-weight:900}.rotationNote{font-size:10px;color:var(--mut);margin-top:4px;line-height:1.3}@media (orientation:landscape) and (min-width:1000px) and (max-height:900px){#record .rotationActions .btn{padding:5px 4px;font-size:10px}#record .rotationActions .nextRot{font-size:12px}#record .rotationNote{font-size:9px;margin-top:2px}}
 .lineLegend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-size:11px;font-weight:800;margin:2px 0 5px}.lineRed{color:#ff5252}.lineBlue{color:#399dff}.lineGray{color:#b9c4ca}@media (orientation:landscape) and (min-width:1000px) and (max-height:900px){#record .lineLegend{font-size:10px;margin:0 0 2px}}
 .ballTypeButtons{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}.ballTypeButtons .btn{padding:6px 2px;font-size:11px;white-space:nowrap}@media (orientation:landscape) and (min-width:1000px) and (max-height:900px){#record .ballTypeButtons .btn{padding:4px 2px;font-size:10px}}
@@ -76,11 +89,24 @@ body.ipadStandalone header{top:0}
 .heat36>div strong{font-size:15px}
 .heat36>div.heatHot{outline:2px solid #ffdf7a;outline-offset:-2px}
 @media(max-width:1000px){.analysisView .btn{font-size:11px;padding:6px 8px}}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v39</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v40</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="title">高速入力</div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="buttons" id="playerButtons"></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="label">③ 結果</div><div class="buttons" id="results"></div><div class="label">レセプション（必要なときだけ変更）</div><div class="buttons" id="recs"></div><div class="label">球質・線の形（必要なときだけ変更）</div><div class="buttons ballTypeButtons" id="ballTypes"></div><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><div class="stats"><div class="stat">攻撃本数<b id="nAtk">0</b></div><div class="stat">決定率<b id="killRate">0%</b></div><div class="stat">ミス率<b id="errRate">0%</b></div><div class="stat">被ブロック<b id="blkRate">0%</b></div></div></div>
 <div class="card right"><div class="serveBox"><div class="row"><div class="title">🏐 サーブ記録</div><span class="small">画面切替なし</span></div><div class="label">サーバー</div><div class="buttons" id="servePlayers"></div><div class="label">サーブ開始位置（エンドライン）</div><div class="serveStartButtons" id="serveStarts" aria-label="サーブ開始位置"></div><div class="label">サーブ種類</div><div class="buttons" id="serveTypes"></div><div class="label">結果（タップで自動保存）</div><div class="buttons serveResultButtons" id="serveResults"></div><button class="btn" id="serveUndo">↩ 直前のサーブを取消</button><div class="small" id="serveHint" role="status" aria-live="polite">サーバー・開始位置・種類を選び、結果をタップすると自動保存します。</div></div><div class="title recentTitle">直近の記録</div><div class="recent" id="recent"></div></div></div></section>
-<section id="analysis" class="page"><div class="card"><div class="title">相手 S1〜S6 コース分析</div><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="analysisView"><span class="small">線の表示：</span><button class="btn on" id="courseGrouped" type="button">集中コース（太線＋本数）</button><button class="btn" id="courseAll" type="button">全コース</button><span class="small">矢印は始点が細く、よく打つほど着地点側が大きく広がります。線上の「×数字」はコースの本数、着地点の数字はゾーン合計。</span></div><div class="filters"><select id="fSet"><option value="all">全セット</option></select><select id="fPlayer"><option value="all">全選手</option></select><select id="fRec"><option value="all">全レセプション</option></select><select id="fAttack"><option value="all">全攻撃</option></select><select id="fResult"><option value="all">全結果</option></select></div><div class="six" id="six"></div></div><div class="dash"><div class="card"><div class="title">着地点ヒートマップ（36分割・本数）</div><div class="small" style="margin-bottom:6px">9ゾーン × A/B/C/D。各ゾーンは C=左上、B=右上、D=左下、A=右下。</div><div class="heat heat36" id="heat"></div></div><div class="card"><div class="title">スカウティング要約</div><div id="summary"></div></div></div></section>
+<section id="analysis" class="page"><div class="card"><div class="title">相手 S1〜S6 コース分析</div><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="analysisView"><span class="small">線の表示：</span><button class="btn on" id="courseGrouped" type="button">集中コース（太線＋本数）</button><button class="btn" id="courseAll" type="button">全コース</button><span class="small">矢印は始点が細く、よく打つほど着地点側が大きく広がります。線上の「×数字」はコースの本数、着地点の数字はゾーン合計。</span></div><div class="filters"><select id="fSet"><option value="all">全セット</option></select><select id="fPlayer"><option value="all">全選手</option></select><select id="fRec"><option value="all">全レセプション</option></select><select id="fAttack"><option value="all">全攻撃</option></select><select id="fResult"><option value="all">全結果</option></select></div><div class="six" id="six"></div></div>
+<div class="card" style="margin:10px 0">
+<div class="title">セット別 攻撃配分の比較</div>
+<div class="small">SET1〜SET5の攻撃割合を比較します。攻撃の種類別／選手別を切り替えられます。配分は打数ベースで、結果による絞り込みはしません。</div>
+<div class="setMixFilters">
+<label>配分の対象 <select id="setMixMode"><option value="attack">攻撃種類別</option><option value="player">選手別</option></select></label>
+<label>ローテ <select id="setMixRot"><option value="all">全ローテ</option><option value="S1">S1</option><option value="S2">S2</option><option value="S3">S3</option><option value="S4">S4</option><option value="S5">S5</option><option value="S6">S6</option></select></label>
+</div>
+<div class="setMixBars" id="setMixBars"></div>
+<div class="setMixLegend" id="setMixLegend"></div>
+<div class="setMixSummary" id="setMixSummary"></div>
+<div class="scroll"><table class="setMixTable"><thead id="setMixHead"></thead><tbody id="setMixBody"></tbody></table></div>
+<div class="small" style="margin-top:8px">変化量は記録のある直近2セットの配分差（ポイント差）。打数が少ないセットでは割合が大きく変わる場合があります。</div>
+</div><div class="dash"><div class="card"><div class="title">着地点ヒートマップ（36分割・本数）</div><div class="small" style="margin-bottom:6px">9ゾーン × A/B/C/D。各ゾーンは C=左上、B=右上、D=左下、A=右下。</div><div class="heat heat36" id="heat"></div></div><div class="card"><div class="title">スカウティング要約</div><div id="summary"></div></div></div></section>
 <section id="players" class="page">
 <div class="card" style="margin-bottom:10px">
 <div class="title">選手別 攻撃コース（記録後すぐ反映）</div>
@@ -420,7 +446,65 @@ function drawAnalysisCourses(x,plays,mode=analysisCourseMode){
     x.textAlign='center';x.textBaseline='middle';x.fillText(String(n),px,py);x.restore()
   })
 }
-function renderAnalysis(){if(!$('analysis').classList.contains('on'))return;let six=$('six');six.innerHTML='';for(let i=1;i<=6;i++){let r='S'+i,l=filtered(r),k=l.filter(x=>x.result==='決定').length,e=l.filter(x=>x.result==='ミス').length,b=l.filter(x=>x.result==='被ブロック').length,d=document.createElement('div');d.className='mini';d.innerHTML=`<div class="miniHead"><b>${r}</b><span>${l.length}本 / Kill ${pct(k,l.length)}</span></div><div class="miniCourt"><div class="analysis36Grid"></div><canvas></canvas></div><div class="kpi"><span>決定<b>${k}</b></span><span>Kill%<b>${pct(k,l.length)}</b></span><span>Eff%<b>${pct(k-e-b,l.length)}</b></span><span>Err+B<b>${e+b}</b></span></div>`;six.appendChild(d);renderAnalysis36Grid(d);let c=d.querySelector('canvas'),x=c.getContext('2d');requestAnimationFrame(()=>{
+// Set distribution uses all recorded attack attempts for the active match.
+const SET_MIX_COLORS=['#ee6c4d','#59c4e6','#f5c84b','#8dcf78','#b69bf2','#f291c3','#f4a261','#73c6ba','#c3b05a','#7aabf3','#e1a9a1','#a4d7a1','#f2a7e4','#9ad1e9','#d9a96c','#a7a4e3','#f0bb78','#8bd1cf'];
+function setMixData(plays,mode,rotation){
+  const sets=[1,2,3,4,5].map(set=>({set,total:0,counts:new Map()}));
+  const totals=new Map();
+  plays.forEach(p=>{
+    if(p.type!=='アタック'||(rotation!=='all'&&p.rot!==rotation))return;
+    const set=Number(p.set);if(!Number.isInteger(set)||set<1||set>5)return;
+    const category=mode==='player'?'#'+String(p.player??'-'):String(p.attack||'未分類');
+    const entry=sets[set-1];entry.total++;
+    entry.counts.set(category,(entry.counts.get(category)||0)+1);
+    totals.set(category,(totals.get(category)||0)+1)
+  });
+  const categories=[...totals.keys()].sort((a,b)=>totals.get(b)-totals.get(a)||a.localeCompare(b,'ja'));
+  const recorded=sets.filter(s=>s.total>0);
+  return {sets,categories,recorded,totals}
+}
+function renderSetMix(){
+  const mode=$('setMixMode').value,rotation=$('setMixRot').value;
+  const {sets,categories,recorded,totals}=setMixData(db.plays,mode,rotation);
+  const escape=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const colors=new Map(categories.map((name,i)=>[name,SET_MIX_COLORS[i%SET_MIX_COLORS.length]]));
+  $('setMixBars').innerHTML=sets.map(s=>{
+    const parts=s.total?categories.filter(name=>s.counts.has(name)).map(name=>{
+      const n=s.counts.get(name),share=n/s.total*100;
+      return `<div class="setMixSegment" style="width:${share}%;background:${colors.get(name)}" title="${escape(name)}：${n}本（${share.toFixed(1)}%）"></div>`
+    }).join(''):'<div class="setMixEmpty">記録なし</div>';
+    return `<div class="setMixRow"><div class="setMixSet">SET${s.set}<small>${s.total}本</small></div><div class="setMixTrack">${parts}</div></div>`
+  }).join('');
+  $('setMixLegend').innerHTML=categories.map(name=>`<span><i style="background:${colors.get(name)}"></i>${escape(name)}（${totals.get(name)}本）</span>`).join('');
+  $('setMixHead').innerHTML='<tr><th>'+(mode==='player'?'選手':'攻撃種類')+'</th>'+sets.map(s=>'<th>SET'+s.set+'<br>'+s.total+'本</th>').join('')+'<th>直近の変化</th></tr>';
+  const prev=recorded.length>=2?recorded[recorded.length-2]:null;
+  const last=recorded.length>=2?recorded[recorded.length-1]:null;
+  const change=name=>last?100*((last.counts.get(name)||0)/last.total-(prev.counts.get(name)||0)/prev.total):null;
+  $('setMixBody').innerHTML=categories.map(name=>{
+    const cells=sets.map(s=>{
+      if(!s.total)return '<td>—</td>';
+      const n=s.counts.get(name)||0;
+      return `<td>${n}本 <span class="small">(${(100*n/s.total).toFixed(1)}%)</span></td>`
+    }).join('');
+    const delta=change(name);
+    const deltaText=delta===null?'—':`<span class="${delta>0?'setMixDeltaUp':delta<0?'setMixDeltaDown':''}">${delta>0?'+':''}${delta.toFixed(1)}pt</span>`;
+    return `<tr><td><b>${escape(name)}</b></td>${cells}<td>${deltaText}</td></tr>`
+  }).join('')||'<tr><td colspan="7">まだ攻撃記録がありません。</td></tr>';
+  if(!recorded.length){$('setMixSummary').textContent='攻撃を記録すると、各セットの配分グラフと比較表が表示されます。';return}
+  const top=recorded.map(s=>{
+    const name=categories.find(n=>s.counts.get(n)===Math.max(...s.counts.values()));
+    return `SET${s.set}：${name} ${((s.counts.get(name)||0)/s.total*100).toFixed(1)}%（${s.counts.get(name)}本）`
+  });
+  if(!last){$('setMixSummary').textContent='最多配分：'+top.join(' ／ ')+'。2セット以上の記録で増減を比較できます。';return}
+  const changes=categories.map(name=>({name,delta:change(name)})).sort((a,b)=>b.delta-a.delta);
+  const up=changes[0],down=changes[changes.length-1];
+  const notes=[];
+  if(up&&up.delta>0)notes.push('増加最大：'+up.name+' ＋'+up.delta.toFixed(1)+'pt');
+  if(down&&down.delta<0)notes.push('減少最大：'+down.name+' '+down.delta.toFixed(1)+'pt');
+  $('setMixSummary').textContent=`SET${prev.set}（${prev.total}本）→ SET${last.set}（${last.total}本）の比較。`+(notes.length?' '+notes.join(' ／ '):' 配分の変化なし。')+'　最多配分：'+top.join(' ／ ')
+}
+['setMixMode','setMixRot'].forEach(id=>$(id).addEventListener('change',renderSetMix));
+function renderAnalysis(){if(!$('analysis').classList.contains('on'))return;renderSetMix();let six=$('six');six.innerHTML='';for(let i=1;i<=6;i++){let r='S'+i,l=filtered(r),k=l.filter(x=>x.result==='決定').length,e=l.filter(x=>x.result==='ミス').length,b=l.filter(x=>x.result==='被ブロック').length,d=document.createElement('div');d.className='mini';d.innerHTML=`<div class="miniHead"><b>${r}</b><span>${l.length}本 / Kill ${pct(k,l.length)}</span></div><div class="miniCourt"><div class="analysis36Grid"></div><canvas></canvas></div><div class="kpi"><span>決定<b>${k}</b></span><span>Kill%<b>${pct(k,l.length)}</b></span><span>Eff%<b>${pct(k-e-b,l.length)}</b></span><span>Err+B<b>${e+b}</b></span></div>`;six.appendChild(d);renderAnalysis36Grid(d);let c=d.querySelector('canvas'),x=c.getContext('2d');requestAnimationFrame(()=>{
   if(!resize(c,x))return;
   try{drawAnalysisCourses(x,l)}
   catch(err){
