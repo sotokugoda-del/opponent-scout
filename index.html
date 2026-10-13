@@ -63,11 +63,11 @@ body.ipadStandalone header{top:0}
 .heat36>div strong{font-size:15px}
 .heat36>div.heatHot{outline:2px solid #ffdf7a;outline-offset:-2px}
 @media(max-width:1000px){.analysisView .btn{font-size:11px;padding:6px 8px}}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v23</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v24</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="title">高速入力</div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="buttons" id="players"></div><div class="label">② トス/攻撃種類</div><div class="buttons" id="attacks"></div><div class="label">③ 結果</div><div class="buttons" id="results"></div><div class="label">レセプション（必要なときだけ変更）</div><div class="buttons" id="recs"></div><div class="label">球質・線の形（必要なときだけ変更）</div><div class="buttons ballTypeButtons" id="ballTypes"></div><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><div class="stats"><div class="stat">攻撃本数<b id="nAtk">0</b></div><div class="stat">決定率<b id="killRate">0%</b></div><div class="stat">ミス率<b id="errRate">0%</b></div><div class="stat">被ブロック<b id="blkRate">0%</b></div></div></div>
 <div class="card right"><div class="serveBox"><div class="row"><div class="title">🏐 サーブ記録</div><span class="small">画面切替なし</span></div><div class="label">サーバー</div><div class="buttons" id="servePlayers"></div><div class="label">サーブ開始位置（エンドライン）</div><div class="serveStartButtons" id="serveStarts" aria-label="サーブ開始位置"></div><div class="label">サーブ種類</div><div class="buttons" id="serveTypes"></div><div class="label">結果（タップで自動保存）</div><div class="buttons serveResultButtons" id="serveResults"></div><button class="btn" id="serveUndo">↩ 直前のサーブを取消</button><div class="small" id="serveHint" role="status" aria-live="polite">サーバー・開始位置・種類を選び、結果をタップすると自動保存します。</div></div><div class="title recentTitle">直近の記録</div><div class="recent" id="recent"></div></div></div></section>
-<section id="analysis" class="page"><div class="card"><div class="title">相手 S1〜S6 コース分析</div><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="analysisView"><span class="small">線の表示：</span><button class="btn on" id="courseGrouped" type="button">集中コース（太線＋本数）</button><button class="btn" id="courseAll" type="button">全コース</button><span class="small">同じ攻撃種類から同じ着地点へ打つほど太線。色は結果別、数字は着地点の合計本数。</span></div><div class="filters"><select id="fSet"><option value="all">全セット</option></select><select id="fPlayer"><option value="all">全選手</option></select><select id="fRec"><option value="all">全レセプション</option></select><select id="fAttack"><option value="all">全攻撃</option></select><select id="fResult"><option value="all">全結果</option></select></div><div class="six" id="six"></div></div><div class="dash"><div class="card"><div class="title">着地点ヒートマップ（36分割・本数）</div><div class="small" style="margin-bottom:6px">9ゾーン × A/B/C/D。各ゾーンは C=左上、B=右上、D=左下、A=右下。</div><div class="heat heat36" id="heat"></div></div><div class="card"><div class="title">スカウティング要約</div><div id="summary"></div></div></div></section>
+<section id="analysis" class="page"><div class="card"><div class="title">相手 S1〜S6 コース分析</div><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="analysisView"><span class="small">線の表示：</span><button class="btn on" id="courseGrouped" type="button">集中コース（太線＋本数）</button><button class="btn" id="courseAll" type="button">全コース</button><span class="small">線の太さ：1本＝細／2本＝中／3〜4本＝太／5本以上＝極太。線上の「×数字」はそのコースの本数、着地点の数字はゾーン合計。</span></div><div class="filters"><select id="fSet"><option value="all">全セット</option></select><select id="fPlayer"><option value="all">全選手</option></select><select id="fRec"><option value="all">全レセプション</option></select><select id="fAttack"><option value="all">全攻撃</option></select><select id="fResult"><option value="all">全結果</option></select></div><div class="six" id="six"></div></div><div class="dash"><div class="card"><div class="title">着地点ヒートマップ（36分割・本数）</div><div class="small" style="margin-bottom:6px">9ゾーン × A/B/C/D。各ゾーンは C=左上、B=右上、D=左下、A=右下。</div><div class="heat heat36" id="heat"></div></div><div class="card"><div class="title">スカウティング要約</div><div id="summary"></div></div></div></section>
 <section id="players" class="page"><div class="card"><div class="title">相手選手別 攻撃成績</div><div class="scroll"><table><thead><tr><th>選手</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th><th>Eff%</th><th>最多R</th><th>最多着地</th></tr></thead><tbody id="ptable"></tbody></table></div></div></section>
 <section id="settings" class="page"><div class="settings"><div class="card"><div class="title">試合設定</div><div class="field"><div class="label">相手校名</div><input id="oppName"></div><div class="field"><div class="label">背番号（カンマ区切り）</div><input id="nums"></div><button class="btn" id="apply">設定を反映</button><p class="small">記録はこのiPadのブラウザ内に自動保存されます。</p><div class="ipadHelp"><b>📱 iPadでアプリとして使う</b><p>Safariでこのページを開き、「共有」→「ホーム画面に追加」を選んでください。追加したアイコンから起動し、iPadを横向きにすると3列の記録画面になります。</p><p>左右の入力欄はそれぞれ上下にスクロールできます。記録は端末内に保存されるため、定期的に「JSONバックアップ」を保存してください。</p></div></div><div class="card"><div class="title">データ出力</div><div class="buttons"><button class="btn" id="csv">CSV出力</button><button class="btn" id="backup">JSONバックアップ</button><label class="btn">JSON復元<input id="restore" type="file" accept="application/json" hidden></label><button class="btn err" id="wipe">全データ消去</button></div></div><div class="card attackPosEditor"><div class="title">攻撃位置設定</div><div class="small">丸をApple Pencil / 指でドラッグして、各攻撃のスタート位置を調整できます。</div><div class="posCourt" id="posCourt"></div><div class="posActions"><button class="btn" id="resetPos">初期位置に戻す</button><button class="btn on" id="savePos">この位置を保存</button></div></div></div></section>
 <script>
@@ -120,7 +120,7 @@ function drawAnalysisCourses(x,plays){
   }
   // Course frequency is the total for attack start + landing zone, regardless of result.
   // Preserve result colors by drawing a separate, slightly offset lane per result.
-  const routes=new Map(),lanes=new Map(),landingCounts={};
+  const routes=new Map(),lanes=new Map(),landingCounts={},routeBadges=[];
   plays.forEach(p=>{
     if(!p.a||!p.b||p.result==='被ブロック')return;
     const z=p.zone36||zone36(p.b),routeKey=p.attack+'|'+z;
@@ -136,23 +136,36 @@ function drawAnalysisCourses(x,plays){
   [...routes.entries()].sort((a,b)=>a[1].n-b[1].n).forEach(([key,route])=>{
     const center=analysisZoneCenter(route.z);if(!center)return;
     const start={x:route.ax/route.n,y:route.ay/route.n};
-    const totalWidth=Math.min(10,2.5+1.8*Math.sqrt(route.n-1));
+    const totalWidth=route.n===1?2.4:route.n===2?6:route.n<=4?11:route.n<=7?16:20;
     const colors=byRoute.get(key).sort((a,b)=>b.n-a.n);
     const W=x.canvas.clientWidth,H=x.canvas.clientHeight;
     const dx=(center.x-start.x)*W,dy=(center.y-start.y)*H,len=Math.hypot(dx,dy)||1;
     const offsetX=-dy/len,offsetY=dx/len;
     // Split the same course into narrow parallel colored lanes, not overpainted lines.
-    const laneWidth=Math.max(1.3,totalWidth/colors.length);
+    const laneWidth=totalWidth/colors.length;
+    // Dark edge makes the thickness readable against the light wooden court.
+    arrow(x,start,center,'#132530',totalWidth+3.5,.82,'強打');
     colors.forEach((lane,index)=>{
       const shift=(index-(colors.length-1)/2)*laneWidth;
       const from={x:start.x+offsetX*shift/W,y:start.y+offsetY*shift/H};
       const to={x:center.x+offsetX*shift/W,y:center.y+offsetY*shift/H};
-      arrow(x,from,to,lineColor(lane.result),laneWidth,.95,lane.ballType)
-    })
+      arrow(x,from,to,lineColor(lane.result),laneWidth,1,lane.ballType)
+    });
+    if(route.n>=2)routeBadges.push({n:route.n,start,center})
   });
   // Blocked attacks still show their two-part rebound course as individual blue paths.
   plays.filter(p=>p.result==='被ブロック'&&p.a&&p.b).forEach(p=>bendArrow(x,p.a,p.b,p.c,lineColor(p.result),2.1,.65,p.ballType||'強打'));
   const W=x.canvas.clientWidth,H=x.canvas.clientHeight;
+  // Count tags on the course itself, separate from landing-zone total badges.
+  routeBadges.forEach(({n,start,center})=>{
+    const px=(start.x*.44+center.x*.56)*W,py=(start.y*.44+center.y*.56)*H;
+    const text='×'+n,radius=12,width=n>=10?32:28;
+    x.save();x.fillStyle='#112530';x.strokeStyle='#fff2b0';x.lineWidth=1.5;
+    x.beginPath();x.roundRect?x.roundRect(px-width/2,py-radius,width,radius*2,7):x.rect(px-width/2,py-radius,width,radius*2);
+    x.fill();x.stroke();
+    x.fillStyle='#fff';x.font='bold 12px -apple-system,sans-serif';x.textAlign='center';x.textBaseline='middle';
+    x.fillText(text,px,py);x.restore()
+  });
   Object.entries(landingCounts).forEach(([z,n])=>{
     if(n<2)return;
     const center=analysisZoneCenter(z);if(!center)return;
