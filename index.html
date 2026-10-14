@@ -428,17 +428,17 @@ function current(){return db.plays.filter(p=>p.set==st.set&&p.rot===st.rot)}func
 function saveAttackPlay(auto=false){if(!st.rot){$('hint').textContent='先にこのセットの開始ローテを選んでください。';pending=null;draw();return false}if(!pending||!pending.a||!pending.b||(st.result==='被ブロック'&&!pending.c)){$('hint').textContent=st.result==='被ブロック'?'被ブロックは折り返し先まで指定してください。':'先にコートへコースを描いてください。';return false}const p={...st,id:Date.now()+Math.random(),ts:new Date().toISOString(),a:pending.a,b:pending.b,c:pending.c||null,zone36:pending.zone36||zone36(pending.b)};db.plays.push(p);st.rec='未記録';updateRecStatus();group('recs',['未記録','A','B','C','返球'],'rec');$('recDetails').open=false;pending=null;drag=null;reboundBase=null;document.querySelectorAll('.landingCell.sel').forEach(x=>x.classList.remove('sel'));saveDB();draw();renderAnalysis();renderPlayers();$('hint').textContent=(auto?'✓ 自動保存：':'✓ 保存：')+' #'+p.player+' '+p.attack+' '+p.result+' → '+p.zone36+' ／ 次の着地点をタップできます';return true}
 $('save').onclick=()=>saveAttackPlay(false);
 $('undo').onclick=()=>{const i=db.plays.findLastIndex?db.plays.findLastIndex(p=>p.type==='アタック'):(()=>{for(let j=db.plays.length-1;j>=0;j--)if(db.plays[j].type==='アタック')return j;return -1})();if(i<0){$('hint').textContent='取り消せるスパイク記録がありません。';return}db.plays.splice(i,1);saveDB();draw();renderAnalysis();renderPlayers();$('hint').textContent='直前のスパイク記録を取り消しました。'};$('clear').onclick=()=>{pending=null;drag=null;reboundBase=null;document.querySelectorAll('.landingCell.sel').forEach(x=>x.classList.remove('sel'));draw()};
-let editingPlayId=null;
+let editingPlayIndex=null;
 function playEditOption(select,values,current,formatter){
  select.replaceChildren();
  values.forEach(value=>{const opt=document.createElement('option');opt.value=String(value);opt.textContent=formatter?formatter(value):String(value);select.appendChild(opt)});
  if(current!=null&&!values.map(String).includes(String(current))){const opt=document.createElement('option');opt.value=String(current);opt.textContent=formatter?formatter(current):String(current);select.appendChild(opt)}
  select.value=String(current??'')
 }
-function editPlayRecord(){return db.plays.find(p=>p.id===editingPlayId)}
-function openPlayEditor(id){
- const p=db.plays.find(play=>play.id===id);if(!p)return;
- editingPlayId=id;
+function editPlayRecord(){return editingPlayIndex==null?null:db.plays[editingPlayIndex]}
+function openPlayEditor(index){
+ const p=db.plays[index];if(!p||p.type!=='アタック')return;
+ editingPlayIndex=index;
  $('editPlayInfo').textContent='SET'+p.set+' / '+p.rot+' / #'+p.player+' / '+(p.ts?new Date(p.ts).toLocaleString('ja-JP'):'日時なし');
  playEditOption($('editPlaySet'),[1,2,3,4,5],p.set,v=>'SET'+v);
  playEditOption($('editPlayRot'),['S1','S2','S3','S4','S5','S6'],p.rot);
@@ -455,7 +455,7 @@ function openPlayEditor(id){
  $('editPlayZoneHelp').textContent=blocked?'被ブロックの接触点・跳ね返り先はこの画面では変更できません。':'着地点を変更するとコースの線も更新されます。';
  const dlg=$('editPlayDialog');if(!dlg.open)dlg.showModal()
 }
-function closePlayEditor(){const dlg=$('editPlayDialog');if(dlg.open)dlg.close();editingPlayId=null}
+function closePlayEditor(){const dlg=$('editPlayDialog');if(dlg.open)dlg.close();editingPlayIndex=null}
 $('editPlayCancel').onclick=closePlayEditor;
 $('editPlayDialog').addEventListener('close',()=>{editingPlayId=null});
 $('editPlayResult').onchange=()=>{const p=editPlayRecord();if(!p)return;const blocked=p.result==='被ブロック'||$('editPlayResult').value==='被ブロック';$('editPlayZone').disabled=blocked;$('editPlayZoneHelp').textContent=blocked?'被ブロックの接触点・跳ね返り先はこの画面では変更できません。':'着地点を変更するとコースの線も更新されます。'};
@@ -476,7 +476,7 @@ $('editPlaySave').onclick=()=>{
 $('editPlayDelete').onclick=()=>{
  const p=editPlayRecord();if(!p){closePlayEditor();return}
  if(!confirm('SET'+p.set+' '+p.rot+' #'+p.player+' '+p.attack+' の記録を1件削除しますか？'))return;
- const index=db.plays.findIndex(play=>play.id===editingPlayId);
+ const index=editingPlayIndex;
  if(index>=0)db.plays.splice(index,1);
  saveDB();closePlayEditor();draw();renderAnalysis();renderPlayers();$('hint').textContent='指定したスパイク記録を1件削除しました。'
 };
@@ -491,7 +491,7 @@ function renderRecent(){
    const detail=document.createElement('div');detail.textContent=p.attack+' / '+(p.ballType||'強打')+' / '+(p.zone36||(p.b?zone36(p.b):'-'))+' / Rec:'+(p.rec||'未記録');
    info.appendChild(title);info.appendChild(detail);
    const btn=document.createElement('button');btn.type='button';btn.className='btn editRecentBtn';btn.textContent='編集';btn.setAttribute('aria-label','SET'+p.set+' '+p.rot+' 背番号'+p.player+'の記録を編集');
-   btn.onclick=()=>openPlayEditor(p.id);
+   btn.onclick=()=>openPlayEditor(index);
    row.appendChild(info);row.appendChild(btn);root.appendChild(row)
  })
 }
