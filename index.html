@@ -246,7 +246,17 @@ body.ipadStandalone header{top:0}
  #record .recordCourtActions .btn{min-height:52px}
 }
 @media (max-width:480px){#record .recordCourtRow{grid-template-columns:minmax(0,1fr) 94px;gap:6px}#record .recordCourtActions .btn{font-size:11px}}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v67</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+/* v68: tap any individual court to zoom into its course lines */
+#players .dashboardCourt{cursor:zoom-in;touch-action:manipulation}
+#players .dashboardCourt:focus-visible{outline:3px solid #2188ff;outline-offset:3px}
+.playerZoomDialog{position:fixed;inset:0;margin:auto;border:1px solid #4d7488;border-radius:14px;background:#10242f;color:#f5fbff;padding:14px;width:min(94vw,720px);max-width:94vw;max-height:94dvh;overflow:auto}
+.playerZoomDialog::backdrop{background:rgba(0,9,15,.85)}
+.playerZoomTop{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:20px;margin-bottom:8px}
+.playerZoomTop .btn{min-height:42px}
+.playerZoomCourt{width:min(100%,440px);height:min(72dvh,650px);max-width:100%;margin:12px auto;position:relative}
+.playerZoomCourt canvas{display:block}
+@media(max-height:750px){.playerZoomCourt{height:min(65dvh,520px)}}
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v68</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="recordInputHeader"><div class="title">高速入力</div><button class="btn" id="recordCompactToggle" type="button" aria-pressed="false">省スペース表示</button></div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="recordCourtRow"><div class="lineupCourt" id="lineupCourt"><div class="lineupNet"></div><div class="lineupAttackLine"></div><div class="lineupPositionGrid" id="playerButtons"></div></div><div class="recordCourtActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="toggleRecordSub" type="button" aria-pressed="false">⇄ 選手交代</button></div></div><div class="recordSub"><div class="small recordSubGuide" id="recordSubGuide" hidden>交代する選手の丸をタップしてください。</div><div id="recordSubPanel" hidden><label>OUT <select id="recordSubOut"></select></label><label>IN <select id="recordSubIn"></select></label><button class="btn on" id="confirmRecordSub" type="button">交代を確定</button><button class="btn" id="cancelRecordSub" type="button">閉じる</button></div><div class="small" id="recordLineupStatus"></div></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="recordOutcomeRow"><div class="recordOutcomeCol"><div class="label">③ 結果</div><div class="buttons" id="results"></div></div><div class="recordOutcomeCol"><div class="label">球質</div><div class="buttons ballTypeButtons" id="ballTypes"></div></div></div><details class="recDetails" id="recDetails"><summary>レセプション（任意） <span id="recStatus">未記録</span></summary><div class="buttons" id="recs"></div><div class="small">選ばなければ未記録。次のプレーには引き継ぎません。</div></details><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="recordSelectionSummary" id="recordSelectionSummary" aria-live="polite">選手・攻撃種類・結果を選択してください</div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><details class="recentDetails"><summary>スパイク記録の確認・修正 <span class="small">（タップして表示・編集）</span></summary><div class="recent" id="recent"></div></details></div></div></section>
 <dialog id="editPlayDialog" class="editPlayDialog" aria-labelledby="editPlayTitle">
@@ -283,7 +293,7 @@ body.ipadStandalone header{top:0}
 <div class="scroll"><table class="setMixTable"><thead id="setMixHead"></thead><tbody id="setMixBody"></tbody></table></div>
 <div class="small" style="margin-top:8px">変化量は記録のある直近2セットの配分差（ポイント差）。打数が少ないセットでは割合が大きく変わる場合があります。</div>
 </div><div class="dash analysisExtra"><div class="card" hidden><div class="title">着地点ヒートマップ（36分割・本数）</div><div class="small" style="margin-bottom:6px">9ゾーン × A/B/C/D。各ゾーンは C=左上、B=右上、D=左下、A=右下。</div><div class="heat heat36" id="heat"></div></div><div class="card"><div class="title">スカウティング要約</div><div id="summary"></div></div></div></section>
-<section id="players" class="page"><div class="card" id="playerDashboard"><div class="title">個人分析｜選手ごとの攻撃コース</div><div class="small">選手別のコースと攻撃種類・本数を表示します。出場中の6人と交代した選手を一覧で確認できます。</div><div class="row" style="margin:8px 0"><label>表示 <select id="dashboardRot"><option value="all">全ローテ</option><option>S1</option><option>S6</option><option>S5</option><option>S4</option><option>S3</option><option>S2</option></select></label><label>攻撃 <select id="dashboardAttack"><option value="all">全攻撃</option></select></label><span id="dashboardStatus" class="small"></span></div><div class="courseDashboardGrid" id="courseDashboardGrid"></div></div>
+<dialog id="playerZoomDialog" class="playerZoomDialog" aria-labelledby="playerZoomTitle"><div class="playerZoomTop"><b id="playerZoomTitle">選手の攻撃コース</b><button class="btn" id="playerZoomClose" type="button">✕ 閉じる</button></div><div class="small" id="playerZoomInfo"></div><div class="miniCourt playerZoomCourt"><div class="analysis36Grid"></div><canvas id="playerZoomCanvas"></canvas></div></dialog><section id="players" class="page"><div class="card" id="playerDashboard"><div class="title">個人分析｜選手ごとの攻撃コース</div><div class="small">選手別のコースと攻撃種類・本数を表示します。出場中の6人と交代した選手を一覧で確認できます。</div><div class="row" style="margin:8px 0"><label>表示 <select id="dashboardRot"><option value="all">全ローテ</option><option>S1</option><option>S6</option><option>S5</option><option>S4</option><option>S3</option><option>S2</option></select></label><label>攻撃 <select id="dashboardAttack"><option value="all">全攻撃</option></select></label><span id="dashboardStatus" class="small"></span></div><div class="small" style="margin:5px 0 9px">各コートをタップすると拡大できます。</div><div class="courseDashboardGrid" id="courseDashboardGrid"></div></div>
 <div class="card legacyPlayerStats" style="margin-bottom:10px">
 <div class="title">選手別 攻撃コース（記録後すぐ反映）</div>
 <div class="playerCourseFilters">
@@ -858,6 +868,24 @@ function renderLineupSettings(){
 }
 $('saveStarters').onclick=()=>{const nums=[...document.querySelectorAll('.starterSelect')].sort((a,b)=>Number(a.dataset.pos)-Number(b.dataset.pos)).map(s=>Number(s.value));if(nums.length!==6||new Set(nums).size!==6||nums.some(n=>!eligiblePlayers().includes(n))){alert('リベロを除く異なる6人を選択してください。');return}db.settings.starters=[...nums];db.settings.lineup=[...nums];db.settings.substitutions=[];saveDB();renderLineupSettings();renderCourseDashboard();renderRecordLineup()};
 $('doSub').onclick=()=>{const out=Number($('subOut').value),incoming=Number($('subIn').value),lineup=lineupPlayers();if(!lineup.includes(out)||!eligiblePlayers().includes(incoming)||lineup.includes(incoming)){alert('交代する選手を確認してください。');return}lineup[lineup.indexOf(out)]=incoming;db.settings.lineup=lineup;db.settings.substitutions=db.settings.substitutions||[];db.settings.substitutions.push({out,in:incoming,set:st.set,rot:st.rot,ts:new Date().toISOString()});saveDB();renderLineupSettings();renderCourseDashboard();renderRecordLineup()};
+let playerZoomData=null;
+function closePlayerZoom(){$('playerZoomDialog').close();playerZoomData=null}
+$('playerZoomClose').onclick=closePlayerZoom;
+$('playerZoomDialog').addEventListener('close',()=>{playerZoomData=null});
+function drawPlayerZoom(){
+ if(!playerZoomData||!$('playerZoomDialog').open)return;
+ const cv=$('playerZoomCanvas'),ctx=cv.getContext('2d');
+ if(resize(cv,ctx)){ctx.clearRect(0,0,cv.clientWidth,cv.clientHeight);drawAnalysisCourses(ctx,playerZoomData.plays,'grouped')}
+}
+function openPlayerZoom(n,plays,rot,attack){
+ playerZoomData={plays:[...plays]};
+ $('playerZoomTitle').textContent='#'+n+' の攻撃コース';
+ $('playerZoomInfo').textContent=(rot==='all'?'全ローテ':rot)+' ／ '+(attack==='all'?'全攻撃':attack)+' ／ '+plays.length+'本';
+ renderAnalysis36Grid($('playerZoomDialog'));
+ const dialog=$('playerZoomDialog');if(!dialog.open)dialog.showModal();
+ requestAnimationFrame(drawPlayerZoom)
+}
+window.addEventListener('resize',()=>{if($('playerZoomDialog').open)requestAnimationFrame(drawPlayerZoom)});
 function renderCourseDashboard(){
  const root=$('courseDashboardGrid');if(!root)return;
  const registered=eligiblePlayers(),lineup=lineupPlayers();
@@ -871,7 +899,7 @@ function renderCourseDashboard(){
  visible.forEach(n=>{const plays=db.plays.filter(p=>p.type==='アタック'&&Number(p.player)===n&&(rot==='all'||p.rot===rot)&&(attack==='all'||p.attack===attack));
  const card=document.createElement('div');card.className='courseDashboardCard';
  const head=document.createElement('div');head.className='courseDashboardHead';head.textContent='#'+n+(lineup.includes(n)?' ● 出場中':' ・ 交代/記録あり')+' ／ '+plays.length+'本';card.appendChild(head);
- const court=document.createElement('div');court.className='miniCourt dashboardCourt';court.innerHTML='<div class="analysis36Grid"></div><canvas></canvas>';card.appendChild(court);root.appendChild(card);
+ const court=document.createElement('div');court.className='miniCourt dashboardCourt';court.innerHTML='<div class="analysis36Grid"></div><canvas></canvas>';card.appendChild(court);court.setAttribute('role','button');court.setAttribute('tabindex','0');court.setAttribute('aria-label','#'+n+' のコートを拡大');court.title='タップして拡大';court.onclick=()=>openPlayerZoom(n,plays,rot,attack);court.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPlayerZoom(n,plays,rot,attack)}};root.appendChild(card);
  renderAnalysis36Grid(card);
  requestAnimationFrame(()=>{if(!$('players').classList.contains('on'))return;const cv=court.querySelector('canvas'),ctx=cv.getContext('2d');if(resize(cv,ctx)){ctx.clearRect(0,0,cv.clientWidth,cv.clientHeight);drawAnalysisCourses(ctx,plays,'grouped')}})
  })
