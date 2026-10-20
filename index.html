@@ -276,7 +276,7 @@ body.ipadStandalone header{top:0}
 #analysis #six .miniMatrixScroll{width:100%;max-height:none;overflow-x:auto;overflow-y:visible}
 #analysis #six .miniMatrixTable{width:100%;font-size:12px}
 #analysis #six .miniMatrixTable th,#analysis #six .miniMatrixTable td{padding:5px 7px}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v74</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v75</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="recordInputHeader"><div class="title">高速入力</div><button class="btn" id="recordCompactToggle" type="button" aria-pressed="false">省スペース表示</button></div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="recordCourtRow"><div class="lineupCourt" id="lineupCourt"><div class="lineupNet"></div><div class="lineupAttackLine"></div><div class="lineupPositionGrid" id="playerButtons"></div></div><div class="recordCourtActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="toggleRecordSub" type="button" aria-pressed="false">⇄ 選手交代</button></div></div><div class="recordSub"><div class="small recordSubGuide" id="recordSubGuide" hidden>交代する選手の丸をタップしてください。</div><div id="recordSubPanel" hidden><label>OUT <select id="recordSubOut"></select></label><label>IN <select id="recordSubIn"></select></label><button class="btn on" id="confirmRecordSub" type="button">交代を確定</button><button class="btn" id="cancelRecordSub" type="button">閉じる</button></div><div class="small" id="recordLineupStatus"></div></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="recordOutcomeRow"><div class="recordOutcomeCol"><div class="label">③ 結果</div><div class="buttons" id="results"></div></div><div class="recordOutcomeCol"><div class="label">球質</div><div class="buttons ballTypeButtons" id="ballTypes"></div></div></div><details class="recDetails" id="recDetails"><summary>レセプション（任意） <span id="recStatus">未記録</span></summary><div class="buttons" id="recs"></div><div class="small">選ばなければ未記録。次のプレーには引き継ぎません。</div></details><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="recordSelectionSummary" id="recordSelectionSummary" aria-live="polite">選手・攻撃種類・結果を選択してください</div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><details class="recentDetails"><summary>スパイク記録の確認・修正 <span class="small">（タップして表示・編集）</span></summary><div class="recent" id="recent"></div></details></div></div></section>
 <dialog id="editPlayDialog" class="editPlayDialog" aria-labelledby="editPlayTitle">
@@ -631,18 +631,24 @@ function zone(p){
 let analysisCourseMode='grouped';
 function analysisZoneCenter(z){for(let r=0;r<6;r++)for(let col=0;col<6;col++)if(zone36FromCell(r,col)===z)return{x:(col+.5)/6,y:.5+(r+.5)/12};return null}
 // Smooth, filled, tapered arrow for grouped courses. Coordinates are normalized to court.
+function fineAnalysisWave(x,A,B,wavy){
+ if(!wavy){x.lineTo(B.x,B.y);return}
+ const dx=B.x-A.x,dy=B.y-A.y,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;
+ const steps=Math.max(24,Math.ceil(len/1.4)),cycles=Math.max(3,Math.round(len/9));
+ for(let i=1;i<=steps;i++){const t=i/steps,fade=Math.min(1,t*9,(1-t)*9);const offset=2.8*fade*Math.sin(2*Math.PI*cycles*t);x.lineTo(A.x+dx*t+nx*offset,A.y+dy*t+ny*offset)}
+}
 function drawAnalysisLine(x,a,b,c,col,w=2.5,alpha=.85,ballType='強打'){
  if(!a||!b)return;const W=x.canvas.clientWidth,H=x.canvas.clientHeight,A={x:a.x*W,y:a.y*H},B={x:b.x*W,y:b.y*H},C=c?{x:c.x*W,y:c.y*H}:null;
  x.save();x.globalAlpha=alpha;x.strokeStyle=col;x.lineWidth=w;x.lineCap='round';x.lineJoin='round';x.beginPath();x.moveTo(A.x,A.y);
- waveSegment(x,A,B,ballType==='フェイント'||ballType==='軟打');if(C)waveSegment(x,B,C,ballType==='フェイント'||ballType==='軟打');x.stroke();x.restore()
+ fineAnalysisWave(x,A,B,ballType==='フェイント'||ballType==='軟打');if(C)fineAnalysisWave(x,B,C,ballType==='フェイント'||ballType==='軟打');x.stroke();x.restore()
 }
 function taperedAnalysisArrow(x,a,b,maxWidth,col,ballType='強打'){
  const W=x.canvas.clientWidth,H=x.canvas.clientHeight,ax=a.x*W,ay=a.y*H,bx=b.x*W,by=b.y*H;
  const dx=bx-ax,dy=by-ay,len=Math.hypot(dx,dy);if(len<1)return;
  const nx=-dy/len,ny=dx/len,wavy=ballType==='フェイント'||ballType==='軟打';
- const steps=24,sideA=[],sideB=[];
+ const steps=Math.max(80,Math.ceil(len/1.5)),sideA=[],sideB=[];
  for(let i=0;i<=steps;i++){const t=i/steps,half=(1.4+(maxWidth-1.4)*t)*.5;
- const sway=wavy?Math.sin(t*Math.PI*5)*2.3*Math.sin(Math.PI*t):0;
+ const sway=wavy?Math.sin(t*Math.PI*Math.max(12,Math.round(len/9)*2))*2.5*Math.sin(Math.PI*t):0;
  const px=ax+dx*t+nx*sway,py=ay+dy*t+ny*sway;
  sideA.push({x:px+nx*half,y:py+ny*half});sideB.push({x:px-nx*half,y:py-ny*half})}
  x.save();x.globalAlpha=.88;x.fillStyle=col;x.beginPath();x.moveTo(sideA[0].x,sideA[0].y);
@@ -968,17 +974,17 @@ function printScoutPdf(kind){
  const cards=[...source.children];
  if(!cards.length){alert('先に分析画面を表示してください');return}
  const esc=s=>String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
- const styles='@page{size:A4 portrait;margin:11mm}body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;color:#14242d;background:white;margin:0}h1{font-size:19px;margin:0 0 5px}.meta{font-size:11px;margin-bottom:14px;color:#456}.item{break-inside:avoid;page-break-inside:avoid;border:1px solid #b7c8d0;border-radius:7px;padding:10px;margin:0 0 12px}.head{font-size:16px;font-weight:800;margin-bottom:8px}.court{position:relative;width:155px;height:310px;margin:8px auto;background:#f5bd89;border:3px solid #7b9caa;overflow:hidden}.court:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:3px solid #333;z-index:1}.court:after{content:"";position:absolute;left:0;right:0;top:33.333%;bottom:33.333%;border-top:2px solid white;border-bottom:2px solid white;z-index:1}.court img{position:absolute;inset:0;width:100%;height:100%;z-index:2}.matrix{overflow:visible}.matrix table{border-collapse:collapse;width:100%;font-size:9px}.matrix th,.matrix td{border:1px solid #99aeb9;padding:3px;text-align:center}.matrix th{background:#e8f0f4}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.item .court{width:110px;height:220px}.item .matrix{overflow-wrap:anywhere}@media print{.item{break-inside:avoid}}';
- const sections=cards.map(card=>{
-  const title=card.querySelector('.miniHead,.dashboardHead,.courseDashboardHead')?.textContent?.trim()||card.querySelector('b')?.textContent?.trim()||'選手';
+ const styles='@page{size:A4 landscape;margin:8mm}*{box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP",sans-serif;color:#14242d;background:white;margin:0}.sheet{height:194mm;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;column-gap:7mm;row-gap:3mm;break-after:page;page-break-after:always}.sheet:last-child{break-after:auto;page-break-after:auto}.item{min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;break-inside:avoid;page-break-inside:avoid}.head{font-size:12px;font-weight:800;margin-bottom:2mm;text-align:center}.court{position:relative;width:41mm;height:82mm;background:#f5bd89;border:2px solid #7b9caa;overflow:hidden;flex:none}.court:before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px solid #333;z-index:1}.court:after{content:"";position:absolute;left:0;right:0;top:33.333%;bottom:33.333%;border-top:1px solid white;border-bottom:1px solid white;z-index:1}.court img{position:absolute;inset:0;width:100%;height:100%;z-index:2}@media print{.sheet{break-after:page;page-break-after:always}.sheet:last-child{break-after:auto;page-break-after:auto}}';
+ const sections=cards.map((card,index)=>{
+  const title=kind==='rotation'?'S'+(index+1):card.querySelector('.courseDashboardHead,.dashboardHead,.miniHead')?.textContent?.trim()||card.querySelector('b')?.textContent?.trim()||'選手';
   const canvas=card.querySelector('canvas');
   let image='';try{image=canvas?.toDataURL('image/png')||''}catch(e){console.warn(e)}
-  const matrix=kind==='rotation'?card.querySelector('.miniMatrixTable')?.outerHTML||'':'';
-  return '<div class="item"><div class="head">'+esc(title)+'</div><div class="court">'+(image?'<img src="'+image+'">':'')+'</div>'+(matrix?'<div class="matrix">'+matrix+'</div>':'')+'</div>'
- }).join('');
+  return '<div class="item"><div class="head">'+esc(title)+'</div><div class="court">'+(image?'<img src="'+image+'">':'')+'</div></div>'
+ });
+ const pages=[];for(let i=0;i<sections.length;i+=4)pages.push('<div class="sheet">'+sections.slice(i,i+4).join('')+'</div>');
  const win=window.open('','_blank');
  if(!win){alert('PDF保存用の画面を開けませんでした。Safariのポップアップ設定をご確認ください。');return}
- win.document.open();win.document.write('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>Opponent Scout 分析PDF</title><style>'+styles+'</style></head><body><h1>Opponent Scout｜'+(kind==='rotation'?'S1〜S6 攻撃コース分析':'選手別 攻撃コース分析')+'</h1><div class="meta">'+esc($('oppName').value||'試合分析')+' ／ '+new Date().toLocaleDateString('ja-JP')+'</div><div class="grid">'+sections+'</div><script>window.addEventListener("load",()=>setTimeout(()=>window.print(),400))<\/script></body></html>');win.document.close()
+ win.document.open();win.document.write('<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>Opponent Scout コートPDF</title><style>'+styles+'</style></head><body>'+pages.join('')+'<script>window.addEventListener("load",()=>setTimeout(()=>window.print(),500))<\/script></body></html>');win.document.close()
 }
 $('printRotationPdf').onclick=()=>printScoutPdf('rotation');
 $('printPlayerPdf').onclick=()=>printScoutPdf('player');
