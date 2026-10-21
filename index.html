@@ -276,7 +276,9 @@ body.ipadStandalone header{top:0}
 #analysis #six .miniMatrixScroll{width:100%;max-height:none;overflow-x:auto;overflow-y:visible}
 #analysis #six .miniMatrixTable{width:100%;font-size:12px}
 #analysis #six .miniMatrixTable th,#analysis #six .miniMatrixTable td{padding:5px 7px}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v75</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+/* v76 team aggregation and video tagging */
+.teamToolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:10px 0}.teamToolbar label{display:flex;gap:5px;align-items:center;font-size:12px}.teamToolbar select{max-width:220px}.teamToolbar input[type=file]{max-width:210px;font-size:11px}.teamMatchChoices{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.teamMatchChoices label{font-size:12px;background:#1b3745;padding:8px;border-radius:8px}.teamAnalysisGrid{display:grid;grid-template-columns:minmax(190px,38%) minmax(0,1fr);gap:16px;margin-top:14px}.teamCourse{width:min(100%,270px);aspect-ratio:1/2;margin:10px auto 20px}.teamSpikeList{max-height:340px;overflow:auto;margin-top:8px}.teamSpikeItem{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px;border-bottom:1px solid #35515f;font-size:12px}.teamSpikeItem.selected{background:#25506a}.teamSpikeItem button{padding:6px}.teamSpikeItem .small{margin-left:auto}@media(max-width:700px){.teamAnalysisGrid{grid-template-columns:1fr}.teamToolbar label{max-width:100%}.teamCourse{width:min(75vw,220px)}}@media(max-width:950px){.tabs .btn{font-size:11px;padding:6px 5px}}
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v76</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="team">チーム総合</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="grid"><div class="card"><div class="recordInputHeader"><div class="title">高速入力</div><button class="btn" id="recordCompactToggle" type="button" aria-pressed="false">省スペース表示</button></div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="recordCourtRow"><div class="lineupCourt" id="lineupCourt"><div class="lineupNet"></div><div class="lineupAttackLine"></div><div class="lineupPositionGrid" id="playerButtons"></div></div><div class="recordCourtActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="toggleRecordSub" type="button" aria-pressed="false">⇄ 選手交代</button></div></div><div class="recordSub"><div class="small recordSubGuide" id="recordSubGuide" hidden>交代する選手の丸をタップしてください。</div><div id="recordSubPanel" hidden><label>OUT <select id="recordSubOut"></select></label><label>IN <select id="recordSubIn"></select></label><button class="btn on" id="confirmRecordSub" type="button">交代を確定</button><button class="btn" id="cancelRecordSub" type="button">閉じる</button></div><div class="small" id="recordLineupStatus"></div></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="recordOutcomeRow"><div class="recordOutcomeCol"><div class="label">③ 結果</div><div class="buttons" id="results"></div></div><div class="recordOutcomeCol"><div class="label">球質</div><div class="buttons ballTypeButtons" id="ballTypes"></div></div></div><details class="recDetails" id="recDetails"><summary>レセプション（任意） <span id="recStatus">未記録</span></summary><div class="buttons" id="recs"></div><div class="small">選ばなければ未記録。次のプレーには引き継ぎません。</div></details><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="recordSelectionSummary" id="recordSelectionSummary" aria-live="polite">選手・攻撃種類・結果を選択してください</div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><details class="recentDetails"><summary>スパイク記録の確認・修正 <span class="small">（タップして表示・編集）</span></summary><div class="recent" id="recent"></div></details></div></div></section>
 <dialog id="editPlayDialog" class="editPlayDialog" aria-labelledby="editPlayTitle">
@@ -351,7 +353,17 @@ body.ipadStandalone header{top:0}
 <div class="small" id="playerDetailSummary"></div>
 <div class="scroll"><table><thead><tr><th>選手</th><th>ローテ</th><th>攻撃種類</th><th>打数</th><th>決定</th><th>継続</th><th>ミス</th><th>被B</th><th>Kill%</th><th>Eff%</th></tr></thead><tbody id="playerDetailTable"></tbody></table></div>
 </div></section>
-<section id="settings" class="page"><div class="settings"><div class="card"><div class="title">試合設定</div>
+<section id="team" class="page">
+<div class="card"><div class="title">🏐 チーム別総合分析・動画確認</div><div class="small">同じ相手チームの試合をまとめて分析。動画はiPadから選んで読み込みます（動画本体は保存・アップロードしません）。</div>
+<div class="teamToolbar"><label>相手チーム <select id="teamNameSelect"></select></label><label>選手 <select id="teamPlayerSelect"></select></label><label>ローテ <select id="teamRotSelect"><option value="all">全ローテ</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></label><button class="btn on" id="teamRefresh" type="button">集計更新</button></div>
+<div id="teamMatchChoices" class="teamMatchChoices"></div><div id="teamSummary" class="small"></div>
+<div class="teamAnalysisGrid"><div><div class="title">選手の合算コース</div><div class="miniCourt teamCourse"><div class="analysis36Grid"></div><canvas id="teamCanvas"></canvas></div></div>
+<div><div class="title">選手別スパイク映像</div><div class="small">試合を選び、動画を読み込んでから「現在位置を紐づけ」を押すと、そのスパイク記録に再生時刻を保存できます。</div>
+<div class="teamToolbar"><label>動画の試合 <select id="teamVideoMatch"></select></label><label>動画ファイル <input id="teamVideoFile" type="file" accept="video/*"></label></div>
+<video id="teamVideo" controls playsinline preload="metadata" style="width:100%;max-height:260px;background:#050a0c;border-radius:9px"></video>
+<div class="teamToolbar"><button class="btn" id="teamBackFive" type="button">−5秒</button><button class="btn" id="teamLinkTime" type="button">このスパイクに現在位置を紐づけ</button><button class="btn on" id="teamPlayAll" type="button">▶ 選手の動画を連続再生</button><button class="btn" id="teamStopAll" type="button">停止</button></div>
+<div class="small" id="teamVideoStatus"></div><div id="teamSpikeList" class="teamSpikeList"></div></div></div></div>
+</section><section id="settings" class="page"><div class="settings"><div class="card"><div class="title">試合設定</div>
 <div class="small" style="margin-bottom:7px">試合を切り替えると記録・集計・コースがその試合のものに切り替わります。</div>
 <div class="matchManager">
 <label>試合 <select id="matchSelector"></select></label>
@@ -988,6 +1000,114 @@ function printScoutPdf(kind){
 }
 $('printRotationPdf').onclick=()=>printScoutPdf('rotation');
 $('printPlayerPdf').onclick=()=>printScoutPdf('player');
+
+/* v76: cross-match team scouting and local video clip linking */
+const TEAM_VIDEO_KEY='opponentScoutVideoTimesV1';
+let teamTimes={};try{teamTimes=JSON.parse(localStorage.getItem(TEAM_VIDEO_KEY)||'{}')||{}}catch(e){teamTimes={}}
+let teamVideos={},teamVideoUrl=null,teamRows=[],teamSelectedKey=null,teamSequence=[],teamSequencePos=-1,teamSequenceStop=0;
+const teamMatchData=m=>{if(m.id===matchIndex.activeId)return db;try{return JSON.parse(localStorage.getItem(MATCH_DATA_PREFIX+m.id)||'null')}catch(e){return null}};
+const teamName=m=>(teamMatchData(m)?.settings?.name||m.name||'').trim();
+const teamKey=(row)=>row.matchId+':'+(row.p.id!=null?row.p.id:'index'+row.index);
+const teamTimestamp=(row)=>teamTimes[teamKey(row)];
+function renderTeamFilters(){
+ const names=[...new Set(matchIndex.matches.map(teamName).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+ const select=$('teamNameSelect'),previous=select.value;select.replaceChildren();
+ names.forEach(name=>{const op=document.createElement('option');op.value=name;op.textContent=name;select.appendChild(op)});
+ select.value=names.includes(previous)?previous:(names.includes(db.settings.name)?db.settings.name:names[0]||'');
+ renderTeamMatches()
+}
+function renderTeamMatches(){
+ const selected=$('teamNameSelect').value,root=$('teamMatchChoices');root.replaceChildren();
+ matchIndex.matches.filter(m=>teamName(m)===selected).forEach(m=>{
+  const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=true;check.value=m.id;check.addEventListener('change',renderTeamAnalysis);
+  label.append(check,document.createTextNode(' '+m.name+' / '+(m.date||'')));root.append(label)
+ });
+ renderTeamAnalysis()
+}
+function renderTeamAnalysis(){
+ const selectedIds=[...$('teamMatchChoices').querySelectorAll('input:checked')].map(c=>c.value);
+ const all=[];
+ for(const m of matchIndex.matches.filter(m=>selectedIds.includes(m.id))){
+  const data=teamMatchData(m);if(!data?.plays)continue;
+  data.plays.forEach((p,index)=>{if(p.type==='アタック')all.push({p,index,matchId:m.id,matchName:m.name})})
+ }
+ const nums=[...new Set(all.map(row=>Number(row.p.player)).filter(Number.isFinite))].sort((a,b)=>a-b);
+ const player=$('teamPlayerSelect'),prev=player.value;player.replaceChildren();
+ nums.forEach(n=>{const o=document.createElement('option');o.value=String(n);o.textContent='#'+n;player.appendChild(o)});
+ if(nums.includes(Number(prev)))player.value=prev;
+ const rotation=$('teamRotSelect').value;
+ teamRows=all.filter(r=>String(r.p.player)===player.value&&(rotation==='all'||r.p.rot===rotation));
+ $('teamSummary').textContent=selectedIds.length+'試合 ／ 合計'+all.length+'本 ／ #'+(player.value||'—')+' '+teamRows.length+'本（背番号で集計）';
+ const v=$('teamVideoMatch'),prevVideo=v.value;v.replaceChildren();
+ matchIndex.matches.filter(m=>selectedIds.includes(m.id)).forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;v.appendChild(o)});
+ if(selectedIds.includes(prevVideo))v.value=prevVideo;
+ if(!teamRows.some(r=>teamKey(r)===teamSelectedKey))teamSelectedKey=teamRows.length?teamKey(teamRows[0]):null;
+ const court=$('teamCanvas'),ctx=court.getContext('2d');renderAnalysis36Grid($('team'));
+ requestAnimationFrame(()=>{if(resize(court,ctx)){ctx.clearRect(0,0,court.clientWidth,court.clientHeight);drawAnalysisCourses(ctx,teamRows.map(r=>r.p),'grouped')}});
+ renderTeamSpikeList()
+}
+function renderTeamSpikeList(){
+ const root=$('teamSpikeList');root.replaceChildren();
+ teamRows.forEach((row,i)=>{
+  const key=teamKey(row),seconds=teamTimestamp(row),el=document.createElement('div');el.className='teamSpikeItem'+(teamSelectedKey===key?' selected':'');
+  const btn=document.createElement('button');btn.className='btn';btn.textContent=(i+1)+'．'+row.matchName+' '+(row.p.rot||'-')+' / '+(row.p.attack||'-')+' / '+(row.p.result||'-');
+  btn.onclick=()=>{teamSelectedKey=key;$('teamVideoMatch').value=row.matchId;renderTeamSpikeList();if(Number.isFinite(seconds))teamSeek(row,false)};
+  el.append(btn);
+  const time=document.createElement('span');time.className='small';time.textContent=Number.isFinite(seconds)?'🎬 '+Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'動画未紐づけ';el.append(time);
+  root.append(el)
+ })
+}
+function teamSetVideoFile(file){
+ if(teamVideoUrl)URL.revokeObjectURL(teamVideoUrl);
+ teamVideoUrl=file?URL.createObjectURL(file):null;
+ const video=$('teamVideo');video.pause();video.removeAttribute('src');if(teamVideoUrl)video.src=teamVideoUrl;video.load();
+ $('teamVideoStatus').textContent=file?'読み込み：'+file.name:'この試合の動画を選んでください'
+}
+function teamSeek(row,autoPlay){
+ const video=$('teamVideo'),s=teamTimestamp(row),m=row.matchId;
+ if(!Number.isFinite(s))return false;
+ if($('teamVideoMatch').value!==m){$('teamVideoMatch').value=m;teamChangeVideoMatch()}
+ if(!teamVideoUrl){$('teamVideoStatus').textContent='「'+row.matchName+'」の動画を選んでください';return false}
+ const jump=()=>{video.currentTime=Math.max(0,s-5);if(autoPlay)video.play().catch(()=>{})};
+ if(video.readyState)jump();else video.addEventListener('loadedmetadata',jump,{once:true});
+ return true
+}
+function teamChangeVideoMatch(){teamSetVideoFile(null);$('teamVideoFile').value=''}
+$('teamVideoMatch').addEventListener('change',()=>{teamSequence=[];teamSequencePos=-1;teamChangeVideoMatch()});
+$('teamVideoFile').addEventListener('change',e=>{teamSequence=[];teamSequencePos=-1;teamSetVideoFile(e.target.files[0])});
+$('teamNameSelect').addEventListener('change',renderTeamMatches);
+$('teamPlayerSelect').addEventListener('change',renderTeamAnalysis);
+$('teamRotSelect').addEventListener('change',renderTeamAnalysis);
+$('teamRefresh').onclick=renderTeamFilters;
+$('teamBackFive').onclick=()=>{$('teamVideo').currentTime=Math.max(0,$('teamVideo').currentTime-5)};
+$('teamLinkTime').onclick=()=>{
+ const row=teamRows.find(r=>teamKey(r)===teamSelectedKey),video=$('teamVideo');
+ if(!row){alert('まず一覧からスパイクを選んでください');return}
+ if(row.matchId!==$('teamVideoMatch').value||!teamVideoUrl||!Number.isFinite(video.duration)){alert('選んだスパイクと同じ試合の動画を読み込んでください');return}
+ teamTimes[teamKey(row)]=video.currentTime;try{localStorage.setItem(TEAM_VIDEO_KEY,JSON.stringify(teamTimes))}catch(e){alert('再生位置を保存できませんでした')}
+ renderTeamSpikeList();$('teamVideoStatus').textContent='✓ このスパイクの再生位置を保存しました'
+};
+function teamNextClip(){
+ teamSequencePos++;
+ if(teamSequencePos>=teamSequence.length){teamSequence=[];teamSequencePos=-1;$('teamVideoStatus').textContent='連続再生が終了しました';return}
+ const row=teamSequence[teamSequencePos];teamSelectedKey=teamKey(row);renderTeamSpikeList();teamSeek(row,true);
+ $('teamVideoStatus').textContent=(teamSequencePos+1)+' / '+teamSequence.length+'：'+row.matchName+' #'+row.p.player
+}
+$('teamPlayAll').onclick=()=>{
+ const m=$('teamVideoMatch').value;teamSequence=teamRows.filter(r=>r.matchId===m&&Number.isFinite(teamTimestamp(r))).sort((a,b)=>teamTimestamp(a)-teamTimestamp(b));
+ if(!teamSequence.length){alert('この試合の選手のスパイクに、動画時刻を紐づけてください');return}
+ if(!teamVideoUrl){alert('この試合の動画を読み込んでください');return}
+ teamSequencePos=-1;teamNextClip()
+};
+$('teamStopAll').onclick=()=>{teamSequence=[];teamSequencePos=-1;$('teamVideo').pause();$('teamVideoStatus').textContent='停止しました'};
+$('teamVideo').addEventListener('timeupdate',()=>{
+ if(teamSequencePos<0||!teamSequence.length)return;
+ const current=teamSequence[teamSequencePos],end=teamTimestamp(current)+4;
+ if($('teamVideo').currentTime>=end){if(teamSequencePos+1<teamSequence.length){teamNextClip()}else{$('teamVideo').pause();teamSequence=[];teamSequencePos=-1;$('teamVideoStatus').textContent='連続再生が終了しました'}}
+});
+document.querySelector('[data-page="team"]').addEventListener('click',()=>requestAnimationFrame(renderTeamFilters));
+window.addEventListener('resize',()=>{if($('team').classList.contains('on'))requestAnimationFrame(renderTeamAnalysis)});
+
 function renderCourseDashboard(){
  const root=$('courseDashboardGrid');if(!root)return;
  const registered=eligiblePlayers(),lineup=lineupPlayers();
