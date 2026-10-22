@@ -1039,6 +1039,7 @@ const teamName=m=>(teamMatchData(m)?.settings?.name||m.name||'').trim();
 const teamKey=(row)=>row.matchId+':'+(row.p.id!=null?row.p.id:'index'+row.index);
 const teamTimestamp=(row)=>teamTimes[teamKey(row)];
 function renderTeamFilters(){
+ try{teamTimes=JSON.parse(localStorage.getItem(TEAM_VIDEO_KEY)||'{}')||{}}catch(e){}
  const names=[...new Set(matchIndex.matches.map(teamName).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
  const select=$('teamNameSelect'),previous=select.value;select.replaceChildren();
  names.forEach(name=>{const op=document.createElement('option');op.value=name;op.textContent=name;select.appendChild(op)});
