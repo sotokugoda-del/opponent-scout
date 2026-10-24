@@ -1217,16 +1217,31 @@ $('teamLinkTime').onclick=()=>{
 function teamNextClip(){
  teamSequencePos++;
  if(teamSequencePos>=teamSequence.length){teamSequence=[];teamSequencePos=-1;$('teamVideoStatus').textContent='連続再生が終了しました';return}
- const row=teamSequence[teamSequencePos];teamSelectedKey=teamKey(row);renderTeamSpikeList();teamSeek(row,true);
- $('teamVideoStatus').textContent=(teamSequencePos+1)+' / '+teamSequence.length+'：'+row.matchName+' #'+row.p.player
+ const row=teamSequence[teamSequencePos];teamSelectedKey=teamKey(row);renderTeamSpikeList();
+ $('teamVideoStatus').textContent=(teamSequencePos+1)+' / '+teamSequence.length+'：'+row.matchName+' #'+row.p.player;
+ if(!teamSeek(row,true)){teamSequence=[];teamSequencePos=-1}
 }
 $('teamPlayAll').onclick=()=>{
  const m=$('teamVideoMatch').value;teamSequence=teamRows.filter(r=>r.matchId===m&&Number.isFinite(teamTimestamp(r))).sort((a,b)=>teamTimestamp(a)-teamTimestamp(b));
  if(!teamSequence.length){alert('この試合の選手のスパイクに、動画時刻を紐づけてください');return}
  if(!teamVideoUrl){alert('この試合の動画を読み込んでください');return}
+ // iPad Safari requires playback to begin directly inside the user's tap handler.
+ const v=$('teamVideo');
+ const start=v.play();
+ if(start&&typeof start.catch==='function')start.catch(e=>{
+  $('teamVideoStatus').textContent='再生開始に失敗しました（'+(e?.name||'原因不明')+'）。動画画面の▶を押してください。';
+ });
  teamSequencePos=-1;teamNextClip()
 };
 $('teamStopAll').onclick=()=>{teamSequence=[];teamSequencePos=-1;$('teamVideo').pause();$('teamVideoStatus').textContent='停止しました'};
+$('teamVideo').addEventListener('error',()=>{
+ const v=$('teamVideo'),code=v.error?.code;
+ $('teamVideoStatus').textContent='動画を読み込めません（エラー '+(code||'不明')+'）。動画ファイル形式と読み込み状態を確認してください。';
+});
+$('teamVideo').addEventListener('stalled',()=>{
+ if($('teamVideo').paused)return;
+ $('teamVideoStatus').textContent='動画の読み込みが止まっています。動画の▶を押すか、ファイルを選び直してください。';
+});
 $('teamVideo').addEventListener('timeupdate',()=>{
  if(teamSequencePos<0||!teamSequence.length||$('teamVideo').seeking||$('teamVideo').paused)return;
  const current=teamSequence[teamSequencePos],end=teamTimestamp(current)+4;
