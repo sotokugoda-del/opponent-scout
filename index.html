@@ -280,6 +280,21 @@ body.ipadStandalone header{top:0}
 .teamToolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:10px 0}.teamToolbar label{display:flex;gap:5px;align-items:center;font-size:12px}.teamToolbar select{max-width:220px}.teamToolbar input[type=file]{max-width:210px;font-size:11px}.teamMatchChoices{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}.teamMatchChoices label{font-size:12px;background:#1b3745;padding:8px;border-radius:8px}.teamAnalysisGrid{display:grid;grid-template-columns:minmax(190px,38%) minmax(0,1fr);gap:16px;margin-top:14px}.teamCourse{width:min(100%,270px);aspect-ratio:1/2;margin:10px auto 20px}.teamSpikeList{max-height:340px;overflow:auto;margin-top:8px}.teamSpikeItem{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:6px;border-bottom:1px solid #35515f;font-size:12px}.teamSpikeItem.selected{background:#25506a}.teamSpikeItem button{padding:6px}.teamSpikeItem .small{margin-left:auto}@media(max-width:700px){.teamAnalysisGrid{grid-template-columns:1fr}.teamToolbar label{max-width:100%}.teamCourse{width:min(75vw,220px)}}@media(max-width:950px){.tabs .btn{font-size:11px;padding:6px 5px}}
 /* v77: video-assisted manual scouting */
 .videoStudyToggle{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:5px 0 9px}.videoStudyButtons{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}.videoStudyButtons .btn{padding:7px;font-size:12px}#videoStudyPanel{background:#10242f;border:1px solid #35515f;border-radius:12px;padding:10px;min-width:0}#videoStudyPanel[hidden]{display:none!important}#videoStudyPanel input{width:100%;font-size:12px}#videoStudyPlayer{width:100%;max-height:45dvh;background:#000;border-radius:8px;margin-top:8px}#videoStudyStatus{margin-top:6px;line-height:1.5}#record.videoStudyOn #videoStudyLayout{display:grid;grid-template-columns:minmax(260px,39%) minmax(0,1fr);gap:8px;align-items:start}#record.videoStudyOn #videoStudyLayout>.grid{min-width:0;grid-template-columns:minmax(260px,44%) minmax(0,1fr)!important;height:auto!important}#record.videoStudyOn #videoStudyLayout>.grid>.right{grid-column:1/-1}#record.videoStudyOn #videoStudyLayout>.grid>.card{height:auto;max-height:calc(100dvh - 100px);overflow:auto}#record.videoStudyOn #videoStudyPanel{position:sticky;top:58px}#record.videoStudyOn #videoStudyPlayer{max-height:44dvh}@media(max-width:1000px){#record.videoStudyOn #videoStudyLayout{grid-template-columns:1fr}#record.videoStudyOn #videoStudyPanel{position:relative;top:auto}#record.videoStudyOn #videoStudyLayout>.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}#record.videoStudyOn #videoStudyPlayer{max-height:32dvh}}@media(max-width:650px){#record.videoStudyOn #videoStudyLayout>.grid{display:flex;flex-direction:column}}
+/* v82: landscape video scouting in input / video / court order */
+@media (min-width:900px) and (orientation:landscape){
+ #record.videoStudyOn #videoStudyLayout{
+  display:grid;grid-template-columns:minmax(0,34%) minmax(0,32%) minmax(0,34%);
+  gap:10px;align-items:start;
+ }
+ #record.videoStudyOn #videoStudyLayout>.grid{display:contents!important}
+ #record.videoStudyOn #videoStudyLayout>.grid>.card{min-width:0;box-sizing:border-box;max-height:calc(100dvh - 100px);overflow:auto}
+ #record.videoStudyOn #videoStudyLayout>.grid>.card:first-child{grid-column:1;grid-row:1}
+ #record.videoStudyOn #videoStudyPanel{grid-column:2;grid-row:1;min-width:0;position:sticky;top:58px}
+ #record.videoStudyOn #videoStudyLayout>.grid>.card:nth-child(2){grid-column:3;grid-row:1}
+ #record.videoStudyOn #videoStudyPlayer{max-height:40dvh}
+ #record.videoStudyOn #videoStudyLayout .court{height:min(52dvh,510px);max-height:52dvh}
+ #record.videoStudyOn #videoStudyLayout .recordCourtRow{grid-template-columns:minmax(0,1fr) 90px}
+}
 /* v78: rotation-specific player × attack-type heatmap, without affecting stored scouting records */
 #analysis #six .miniMatrixTable td.attackHeat{text-align:center;font-weight:800;background:transparent}
 #analysis #six .miniMatrixTable td.attackHeat.low{background:#264b60;color:#e2f6ff}
