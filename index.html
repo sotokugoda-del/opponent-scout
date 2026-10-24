@@ -290,7 +290,9 @@ body.ipadStandalone header{top:0}
 #analysis .attackHeatLegend i.low{background:#264b60}
 #analysis .attackHeatLegend i.medium{background:#2775a2}
 #analysis .attackHeatLegend i.high{background:#1250ad;border:1px solid #72b7ff}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v80</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="team">チーム総合</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+/* v81: correct mistaken player assignment from linked spike video list */
+.teamSpikeEdit{font-size:11px!important;padding:6px 9px!important;background:#36566a;border-color:#7193a5}
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v81</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="team">チーム総合</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="videoStudyToggle"><button class="btn" id="videoStudyToggle" type="button" aria-pressed="false">🎬 動画を見ながら記録</button><span class="small">通常の試合中はOFFのまま使えます。</span></div><div id="videoStudyLayout"><div id="videoStudyPanel" hidden><div class="title">🎬 動画分析モード</div><div class="small">この試合の動画を選び、一時停止してスパイクを記録。保存時に再生時刻も自動で紐づきます。</div><input type="file" id="videoStudyFile" accept="video/*"><video id="videoStudyPlayer" controls playsinline preload="metadata"></video><div class="videoStudyButtons"><button class="btn" id="videoStudyBack" type="button">−5秒</button><button class="btn" id="videoStudyFrameBack" type="button">−0.1秒</button><button class="btn" id="videoStudyFrameNext" type="button">＋0.1秒</button><button class="btn" id="videoStudyForward" type="button">＋5秒</button><button class="btn on" id="videoStudyPlay" type="button">▶ / 一時停止</button></div><div class="small" id="videoStudyStatus">動画を読み込んでください。</div></div><div class="grid"><div class="card"><div class="recordInputHeader"><div class="title">高速入力</div><button class="btn" id="recordCompactToggle" type="button" aria-pressed="false">省スペース表示</button></div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="recordCourtRow"><div class="lineupCourt" id="lineupCourt"><div class="lineupNet"></div><div class="lineupAttackLine"></div><div class="lineupPositionGrid" id="playerButtons"></div></div><div class="recordCourtActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="toggleRecordSub" type="button" aria-pressed="false">⇄ 選手交代</button></div></div><div class="recordSub"><div class="small recordSubGuide" id="recordSubGuide" hidden>交代する選手の丸をタップしてください。</div><div id="recordSubPanel" hidden><label>OUT <select id="recordSubOut"></select></label><label>IN <select id="recordSubIn"></select></label><button class="btn on" id="confirmRecordSub" type="button">交代を確定</button><button class="btn" id="cancelRecordSub" type="button">閉じる</button></div><div class="small" id="recordLineupStatus"></div></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="recordOutcomeRow"><div class="recordOutcomeCol"><div class="label">③ 結果</div><div class="buttons" id="results"></div></div><div class="recordOutcomeCol"><div class="label">球質</div><div class="buttons ballTypeButtons" id="ballTypes"></div></div></div><details class="recDetails" id="recDetails"><summary>レセプション（任意） <span id="recStatus">未記録</span></summary><div class="buttons" id="recs"></div><div class="small">選ばなければ未記録。次のプレーには引き継ぎません。</div></details><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="recordSelectionSummary" id="recordSelectionSummary" aria-live="polite">選手・攻撃種類・結果を選択してください</div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><details class="recentDetails"><summary>スパイク記録の確認・修正 <span class="small">（タップして表示・編集）</span></summary><div class="recent" id="recent"></div></details></div></div></div></div></section>
 <dialog id="editPlayDialog" class="editPlayDialog" aria-labelledby="editPlayTitle">
@@ -1094,9 +1096,30 @@ function renderTeamSpikeList(){
   const btn=document.createElement('button');btn.className='btn';btn.textContent=(i+1)+'．'+row.matchName+' '+(row.p.rot||'-')+' / '+(row.p.attack||'-')+' / '+(row.p.result||'-');
   btn.onclick=()=>{teamSelectedKey=key;$('teamVideoMatch').value=row.matchId;renderTeamSpikeList();if(Number.isFinite(seconds))teamSeek(row,false)};
   el.append(btn);
+  const edit=document.createElement('button');edit.className='btn teamSpikeEdit';edit.type='button';edit.textContent='背番号を修正';edit.onclick=()=>teamEditSpikePlayer(row);el.append(edit);
   const time=document.createElement('span');time.className='small';time.textContent=Number.isFinite(seconds)?'🎬 '+Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'動画未紐づけ';el.append(time);
   root.append(el)
  })
+}
+function teamEditSpikePlayer(row){
+ const match=matchIndex.matches.find(m=>m.id===row.matchId),data=match&&teamMatchData(match);
+ if(!data||!Array.isArray(data.plays)||!data.plays[row.index]){alert('元の試合記録が見つかりません。');return}
+ const current=Number(data.plays[row.index].player);
+ const available=[...new Set([...(data.settings.players||[]).map(Number),current])].filter(n=>Number.isInteger(n)&&n>0).sort((a,b)=>a-b);
+ const answer=prompt('修正後の背番号を入力してください。\\n登録選手：'+available.map(n=>'#'+n).join('、'),String(current));
+ if(answer===null)return;
+ const next=Number(answer.trim().replace(/^#/,''));
+ if(!Number.isInteger(next)||!available.includes(next)){alert('登録済みの正しい背番号を入力してください。');return}
+ if(next===current)return;
+ if(!confirm(row.matchName+' のスパイクを #'+current+' → #'+next+' に変更しますか？'))return;
+ data.plays[row.index].player=next;
+ try{
+  if(row.matchId===matchIndex.activeId){saveDB();archiveCurrentMatch();renderPlayers();renderAnalysis()}
+  else localStorage.setItem(MATCH_DATA_PREFIX+row.matchId,JSON.stringify(data));
+ }catch(err){data.plays[row.index].player=current;alert('記録を保存できませんでした。空き容量を確認してください。');return}
+ teamSequence=[];teamSequencePos=-1;$('teamVideo').pause();
+ $('teamVideoStatus').textContent='✓ '+row.matchName+'：#'+current+' → #'+next+' に修正しました。動画の時刻は維持しています。';
+ renderTeamAnalysis()
 }
 function teamSetVideoFile(file){
  if(teamVideoUrl)URL.revokeObjectURL(teamVideoUrl);
