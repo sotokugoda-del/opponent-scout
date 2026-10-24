@@ -1081,7 +1081,9 @@ $('videoStudyFile').onchange=e=>{
  const file=e.target.files[0],video=$('videoStudyPlayer');
  videoStudyLoadedFile=file||null;videoStudyUrl=file?URL.createObjectURL(file):null;
  video.pause();video.removeAttribute('src');if(videoStudyUrl)video.src=videoStudyUrl;video.load();
- $('videoStudyStatus').textContent=file?'読み込み済み：'+file.name+' ／ コースを保存すると動画時刻を自動記録します':'動画を読み込んでください'
+ $('videoStudyStatus').textContent=file?'読み込み済み：'+file.name+' ／ コースを保存すると動画時刻を自動記録します':'動画を読み込んでください';
+ // 同じ試合の個人別分析にも選択した動画を共有する（動画自体は保存・アップロードしない）。
+ if($('teamVideoMatch').value===matchIndex.activeId){teamSetVideoFile(file||null);$('teamVideoFile').value='';}
 };
 $('videoStudyBack').onclick=()=>{$('videoStudyPlayer').currentTime=Math.max(0,$('videoStudyPlayer').currentTime-5)};
 $('videoStudyForward').onclick=()=>{$('videoStudyPlayer').currentTime=Math.min($('videoStudyPlayer').duration||Infinity,$('videoStudyPlayer').currentTime+5)};
@@ -1128,6 +1130,8 @@ function renderTeamAnalysis(){
  const v=$('teamVideoMatch'),prevVideo=v.value;v.replaceChildren();
  matchIndex.matches.filter(m=>selectedIds.includes(m.id)).forEach(m=>{const o=document.createElement('option');o.value=m.id;o.textContent=m.name;v.appendChild(o)});
  if(selectedIds.includes(prevVideo))v.value=prevVideo;
+ // 初回表示時も分析画面で読み込んだ同じ試合の動画を利用する。
+ if(v.value===matchIndex.activeId&&videoStudyLoadedFile&&!teamVideoUrl)teamChangeVideoMatch();
  if(!teamRows.some(r=>teamKey(r)===teamSelectedKey))teamSelectedKey=teamRows.length?teamKey(teamRows[0]):null;
  const court=$('teamCanvas'),ctx=court.getContext('2d');renderAnalysis36Grid($('team'));
  requestAnimationFrame(()=>{if(resize(court,ctx)){ctx.clearRect(0,0,court.clientWidth,court.clientHeight);drawAnalysisCourses(ctx,teamRows.map(r=>r.p),'grouped')}});
@@ -1176,7 +1180,7 @@ function teamSeek(row,autoPlay){
  if(!Number.isFinite(s))return false;
  if($('teamVideoMatch').value!==m){$('teamVideoMatch').value=m;teamChangeVideoMatch()}
  if(!teamVideoUrl){$('teamVideoStatus').textContent='「'+row.matchName+'」の動画を選んでください';return false}
- const target=Math.max(0,s-3);
+ const target=Math.max(0,s-1.5);
  const play=()=>{
   if(!autoPlay)return;
   const attempt=video.play();
@@ -1198,7 +1202,13 @@ function teamSeek(row,autoPlay){
  if(video.readyState>=1)jump();else video.addEventListener('loadedmetadata',jump,{once:true});
  return true
 }
-function teamChangeVideoMatch(){teamSetVideoFile(null);$('teamVideoFile').value=''}
+function teamChangeVideoMatch(){
+ $('teamVideoFile').value='';
+ if($('teamVideoMatch').value===matchIndex.activeId&&videoStudyLoadedFile){
+  teamSetVideoFile(videoStudyLoadedFile);
+  $('teamVideoStatus').textContent='分析画面から共有：'+videoStudyLoadedFile.name;
+ }else teamSetVideoFile(null);
+}
 $('teamVideoMatch').addEventListener('change',()=>{teamSequence=[];teamSequencePos=-1;teamChangeVideoMatch()});
 $('teamVideoFile').addEventListener('change',e=>{teamSequence=[];teamSequencePos=-1;teamSetVideoFile(e.target.files[0])});
 $('teamNameSelect').addEventListener('change',renderTeamMatches);
