@@ -1176,8 +1176,26 @@ function teamSeek(row,autoPlay){
  if(!Number.isFinite(s))return false;
  if($('teamVideoMatch').value!==m){$('teamVideoMatch').value=m;teamChangeVideoMatch()}
  if(!teamVideoUrl){$('teamVideoStatus').textContent='「'+row.matchName+'」の動画を選んでください';return false}
- const jump=()=>{video.currentTime=Math.max(0,s-5);if(autoPlay)video.play().catch(()=>{})};
- if(video.readyState)jump();else video.addEventListener('loadedmetadata',jump,{once:true});
+ const target=Math.max(0,s-5);
+ const play=()=>{
+  if(!autoPlay)return;
+  const attempt=video.play();
+  if(attempt&&typeof attempt.catch==='function')attempt.catch(e=>{
+   $('teamVideoStatus').textContent='再生できませんでした。動画画面の▶を押してください。'+(e?.name==='NotAllowedError'?' iPadの再生制限が働いています。':'')
+  });
+ };
+ const jump=()=>{
+  if(Number.isFinite(video.duration)&&target>=video.duration){$('teamVideoStatus').textContent='記録時刻が動画の長さを超えています。紐づけ時刻を確認してください';return}
+  try{
+   if(Math.abs(video.currentTime-target)>.15){
+    video.addEventListener('seeked',play,{once:true});
+    video.currentTime=target;
+    // iPadでは利用者のタップ中に再生を要求する必要がある場合があります。
+    if(autoPlay&&video.paused)play();
+   }else play();
+  }catch(e){$('teamVideoStatus').textContent='再生位置を設定できませんでした。動画を再読み込みしてください'}
+ };
+ if(video.readyState>=1)jump();else video.addEventListener('loadedmetadata',jump,{once:true});
  return true
 }
 function teamChangeVideoMatch(){teamSetVideoFile(null);$('teamVideoFile').value=''}
@@ -1210,7 +1228,7 @@ $('teamPlayAll').onclick=()=>{
 };
 $('teamStopAll').onclick=()=>{teamSequence=[];teamSequencePos=-1;$('teamVideo').pause();$('teamVideoStatus').textContent='停止しました'};
 $('teamVideo').addEventListener('timeupdate',()=>{
- if(teamSequencePos<0||!teamSequence.length)return;
+ if(teamSequencePos<0||!teamSequence.length||$('teamVideo').seeking||$('teamVideo').paused)return;
  const current=teamSequence[teamSequencePos],end=teamTimestamp(current)+4;
  if($('teamVideo').currentTime>=end){if(teamSequencePos+1<teamSequence.length){teamNextClip()}else{$('teamVideo').pause();teamSequence=[];teamSequencePos=-1;$('teamVideoStatus').textContent='連続再生が終了しました'}}
 });
