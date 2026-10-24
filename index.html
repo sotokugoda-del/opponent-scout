@@ -469,19 +469,30 @@ const previousOrder=Array.isArray(db.settings.attackOrder)?db.settings.attackOrd
 const preserved=previousOrder.filter((name,i)=>DEFAULT_ATTACK_ORDER.includes(name)&&previousOrder.indexOf(name)===i);
 db.settings.attackOrder=db.settings.attackLayoutVersion===2?[...preserved,...DEFAULT_ATTACK_ORDER.filter(name=>!preserved.includes(name))]:[...DEFAULT_ATTACK_ORDER];db.settings.attackLayoutVersion=2;
 db.settings.attackColumns=7;
-/* Sync preparation: local storage remains authoritative until a cloud backend is configured. */
-const SYNC_PENDING_KEY='opponentScoutSyncPendingV1';
+/* Offline-first sync preparation. These metadata entries never replace scouting records. */
+const SYNC_PENDING_KEY='opponentScoutSyncPendingV2';
+function readPendingSync(){
+ try{
+  const data=JSON.parse(localStorage.getItem(SYNC_PENDING_KEY)||'{}');
+  return data&&typeof data==='object'&&!Array.isArray(data)?data:{};
+ }catch(e){return {}}
+}
 function markPendingSync(){
  try{
-  localStorage.setItem(SYNC_PENDING_KEY,JSON.stringify({matchId:matchIndex.activeId,updatedAt:new Date().toISOString(),state:'pending'}));
+  const entries=readPendingSync(),id=matchIndex.activeId;
+  const previous=entries[id]||{};
+  entries[id]={updatedAt:new Date().toISOString(),revision:(Number(previous.revision)||0)+1,state:'pending'};
+  localStorage.setItem(SYNC_PENDING_KEY,JSON.stringify(entries));
   updateSyncPreparationStatus();
  }catch(e){console.warn('同期準備の状態を保存できませんでした',e)}
 }
 function updateSyncPreparationStatus(){
  const el=$('syncPreparationStatus');if(!el)return;
- let pending=null;
- try{pending=JSON.parse(localStorage.getItem(SYNC_PENDING_KEY)||'null')}catch(e){}
- el.textContent=pending?'この端末に変更を保存済み（クラウド未接続・未送信）':'クラウド未接続：記録はこの端末に保存されます';
+ const entries=readPendingSync();
+ const count=Object.keys(entries).filter(id=>entries[id]?.state==='pending').length;
+ el.textContent=count
+  ? 'クラウド未接続・未送信：'+count+'試合分の変更があります。記録はこの端末に保存されています。'
+  : 'クラウド未接続：記録はこの端末に保存されます（自動同期は未設定）';
 }
 const saveDB=()=>{localStorage.setItem(KEY,JSON.stringify(db));markPendingSync()},pct=(a,b)=>b?Math.round(a/b*100)+'%':'0%',color=p=>colors[db.settings.players.indexOf(+p)%colors.length]||'#fff',lineColor=result=>result==='決定'?'#ff5252':(result==='継続'||result==='被ブロック')?'#399dff':'#b9c4ca';
 function group(id,vals,key){let e=$(id);e.innerHTML='';vals.forEach(v=>{let b=document.createElement('button');b.className='btn'+(String(st[key])===String(v)?' on':'');b.textContent=key==='player'?'#'+v:v;b.onclick=()=>{if(key==='set'){st.set=v;st.rot=db.settings.currentRotations[v]||db.settings.setStarts[v]||null;pending=null;drag=null;reboundBase=null;group('rots',ROT_ORDER,'rot');updateRotationUI();renderRecordLineup()}else if(key==='rot'){selectRotation(v)}else{st[key]=v}if(key==='rec')updateRecStatus();if(key==='attack'&&db.settings.attackPositions&&db.settings.attackPositions[v]){let q=db.settings.attackPositions[v];pending={a:{x:q.x,y:q.y},b:{x:q.x,y:q.y}};reboundBase=null;$('hint').textContent=st.result==='被ブロック'?'攻撃位置を設定しました。① ブロックに当たった位置をタップすると、攻撃位置から線を引きます。':'スタート位置をセットしました。コート上の着地点まで線を引いてください。'}if(key==='result'){
