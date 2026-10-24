@@ -1176,7 +1176,7 @@ function teamSeek(row,autoPlay){
  if(!Number.isFinite(s))return false;
  if($('teamVideoMatch').value!==m){$('teamVideoMatch').value=m;teamChangeVideoMatch()}
  if(!teamVideoUrl){$('teamVideoStatus').textContent='「'+row.matchName+'」の動画を選んでください';return false}
- const jump=()=>{video.currentTime=Math.max(0,s-3);if(autoPlay)video.play().catch(()=>{})};
+ const jump=()=>{video.currentTime=Math.max(0,s-5);if(autoPlay)video.play().catch(()=>{})};
  if(video.readyState)jump();else video.addEventListener('loadedmetadata',jump,{once:true});
  return true
 }
