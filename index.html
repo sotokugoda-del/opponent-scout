@@ -292,7 +292,11 @@ body.ipadStandalone header{top:0}
  #record.videoStudyOn #videoStudyPanel{grid-column:2;grid-row:1;min-width:0;position:sticky;top:58px}
  #record.videoStudyOn #videoStudyLayout>.grid>.card:nth-child(2){grid-column:3;grid-row:1}
  #record.videoStudyOn #videoStudyPlayer{max-height:40dvh}
- #record.videoStudyOn #videoStudyLayout .court{height:min(52dvh,510px);max-height:52dvh}
+ /* Keep the right-hand landing court visible: ordinary record mode uses a flex:1 1 0 court wrapper that collapses inside an auto-height card. */
+ #record.videoStudyOn #videoStudyLayout>.grid>.card:nth-child(2){display:block!important;height:auto!important;overflow-y:auto}
+ #record.videoStudyOn #videoStudyLayout>.grid>.card:nth-child(2) .courtWrap{display:block!important;flex:none!important;height:auto!important;min-height:0!important;overflow:visible!important}
+ #record.videoStudyOn #videoStudyLayout .court{display:block!important;height:min(52dvh,510px)!important;max-height:52dvh!important;min-height:220px;width:auto;max-width:100%;margin:8px auto}
+
  #record.videoStudyOn #videoStudyLayout .recordCourtRow{grid-template-columns:minmax(0,1fr) 90px}
 }
 /* v78: rotation-specific player × attack-type heatmap, without affecting stored scouting records */
