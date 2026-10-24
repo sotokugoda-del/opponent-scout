@@ -1176,7 +1176,7 @@ function teamSeek(row,autoPlay){
  if(!Number.isFinite(s))return false;
  if($('teamVideoMatch').value!==m){$('teamVideoMatch').value=m;teamChangeVideoMatch()}
  if(!teamVideoUrl){$('teamVideoStatus').textContent='「'+row.matchName+'」の動画を選んでください';return false}
- const target=Math.max(0,s-5);
+ const target=Math.max(0,s-3);
  const play=()=>{
   if(!autoPlay)return;
   const attempt=video.play();
