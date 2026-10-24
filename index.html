@@ -393,7 +393,7 @@ body.ipadStandalone header{top:0}
 <div class="teamToolbar"><span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:nowrap"><button class="btn" id="teamBackFive" type="button">−5秒</button><button class="btn" id="teamForwardFive" type="button">＋5秒</button></span><button class="btn" id="teamLinkTime" type="button">このスパイクに現在位置を紐づけ</button><button class="btn on" id="teamPlayAll" type="button">▶ 選手の動画を連続再生</button><button class="btn" id="teamStopAll" type="button">停止</button></div>
 <div class="small" id="teamVideoStatus"></div><div id="teamSpikeList" class="teamSpikeList"></div></div></div></div>
 </section><section id="settings" class="page"><div class="settings"><div class="card"><div class="title">試合設定</div>
-<div class="small" style="margin-bottom:7px">試合を切り替えると記録・集計・コースがその試合のものに切り替わります。</div>
+<div class="small" style="margin-bottom:7px">試合を切り替えると記録・集計・コースがその試合のものに切り替わります。</div><div id="syncPreparationStatus" class="small" role="status" aria-live="polite" style="margin-bottom:8px">クラウド未接続：記録はこの端末に保存されます</div>
 <div class="matchManager">
 <label>試合 <select id="matchSelector"></select></label>
 <label>新しい相手校・試合名 <input id="newMatchName" placeholder="例：○○高校 10/15"></label>
@@ -469,7 +469,21 @@ const previousOrder=Array.isArray(db.settings.attackOrder)?db.settings.attackOrd
 const preserved=previousOrder.filter((name,i)=>DEFAULT_ATTACK_ORDER.includes(name)&&previousOrder.indexOf(name)===i);
 db.settings.attackOrder=db.settings.attackLayoutVersion===2?[...preserved,...DEFAULT_ATTACK_ORDER.filter(name=>!preserved.includes(name))]:[...DEFAULT_ATTACK_ORDER];db.settings.attackLayoutVersion=2;
 db.settings.attackColumns=7;
-const saveDB=()=>localStorage.setItem(KEY,JSON.stringify(db)),pct=(a,b)=>b?Math.round(a/b*100)+'%':'0%',color=p=>colors[db.settings.players.indexOf(+p)%colors.length]||'#fff',lineColor=result=>result==='決定'?'#ff5252':(result==='継続'||result==='被ブロック')?'#399dff':'#b9c4ca';
+/* Sync preparation: local storage remains authoritative until a cloud backend is configured. */
+const SYNC_PENDING_KEY='opponentScoutSyncPendingV1';
+function markPendingSync(){
+ try{
+  localStorage.setItem(SYNC_PENDING_KEY,JSON.stringify({matchId:matchIndex.activeId,updatedAt:new Date().toISOString(),state:'pending'}));
+  updateSyncPreparationStatus();
+ }catch(e){console.warn('同期準備の状態を保存できませんでした',e)}
+}
+function updateSyncPreparationStatus(){
+ const el=$('syncPreparationStatus');if(!el)return;
+ let pending=null;
+ try{pending=JSON.parse(localStorage.getItem(SYNC_PENDING_KEY)||'null')}catch(e){}
+ el.textContent=pending?'この端末に変更を保存済み（クラウド未接続・未送信）':'クラウド未接続：記録はこの端末に保存されます';
+}
+const saveDB=()=>{localStorage.setItem(KEY,JSON.stringify(db));markPendingSync()},pct=(a,b)=>b?Math.round(a/b*100)+'%':'0%',color=p=>colors[db.settings.players.indexOf(+p)%colors.length]||'#fff',lineColor=result=>result==='決定'?'#ff5252':(result==='継続'||result==='被ブロック')?'#399dff':'#b9c4ca';
 function group(id,vals,key){let e=$(id);e.innerHTML='';vals.forEach(v=>{let b=document.createElement('button');b.className='btn'+(String(st[key])===String(v)?' on':'');b.textContent=key==='player'?'#'+v:v;b.onclick=()=>{if(key==='set'){st.set=v;st.rot=db.settings.currentRotations[v]||db.settings.setStarts[v]||null;pending=null;drag=null;reboundBase=null;group('rots',ROT_ORDER,'rot');updateRotationUI();renderRecordLineup()}else if(key==='rot'){selectRotation(v)}else{st[key]=v}if(key==='rec')updateRecStatus();if(key==='attack'&&db.settings.attackPositions&&db.settings.attackPositions[v]){let q=db.settings.attackPositions[v];pending={a:{x:q.x,y:q.y},b:{x:q.x,y:q.y}};reboundBase=null;$('hint').textContent=st.result==='被ブロック'?'攻撃位置を設定しました。① ブロックに当たった位置をタップすると、攻撃位置から線を引きます。':'スタート位置をセットしました。コート上の着地点まで線を引いてください。'}if(key==='result'){
   if(v==='被ブロック'){
     if(pending&&pending.a&&pending.b&&!(pending.a.x===pending.b.x&&pending.a.y===pending.b.y)){
@@ -1349,7 +1363,7 @@ if('ResizeObserver' in window){
   });
   analysisObserver.observe($('six'))
 }
-controls();requestAnimationFrame(()=>{draw();renderPlayers()});
+controls();updateSyncPreparationStatus();requestAnimationFrame(()=>{draw();renderPlayers()});
 </script><script>
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', async () => {
