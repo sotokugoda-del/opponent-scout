@@ -375,7 +375,7 @@ body.ipadStandalone header{top:0}
 <div><div class="title">選手別スパイク映像</div><div class="small">試合を選び、動画を読み込んでから「現在位置を紐づけ」を押すと、そのスパイク記録に再生時刻を保存できます。</div>
 <div class="teamToolbar"><label>動画の試合 <select id="teamVideoMatch"></select></label><label>動画ファイル <input id="teamVideoFile" type="file" accept="video/*"></label></div>
 <video id="teamVideo" controls playsinline preload="metadata" style="width:100%;max-height:260px;background:#050a0c;border-radius:9px"></video>
-<div class="teamToolbar"><button class="btn" id="teamBackFive" type="button">−5秒</button><button class="btn" id="teamLinkTime" type="button">このスパイクに現在位置を紐づけ</button><button class="btn on" id="teamPlayAll" type="button">▶ 選手の動画を連続再生</button><button class="btn" id="teamStopAll" type="button">停止</button></div>
+<div class="teamToolbar"><span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:nowrap"><button class="btn" id="teamBackFive" type="button">−5秒</button><button class="btn" id="teamForwardFive" type="button">＋5秒</button></span><button class="btn" id="teamLinkTime" type="button">このスパイクに現在位置を紐づけ</button><button class="btn on" id="teamPlayAll" type="button">▶ 選手の動画を連続再生</button><button class="btn" id="teamStopAll" type="button">停止</button></div>
 <div class="small" id="teamVideoStatus"></div><div id="teamSpikeList" class="teamSpikeList"></div></div></div></div>
 </section><section id="settings" class="page"><div class="settings"><div class="card"><div class="title">試合設定</div>
 <div class="small" style="margin-bottom:7px">試合を切り替えると記録・集計・コースがその試合のものに切り替わります。</div>
@@ -1144,6 +1144,7 @@ $('teamPlayerSelect').addEventListener('change',renderTeamAnalysis);
 $('teamRotSelect').addEventListener('change',renderTeamAnalysis);
 $('teamRefresh').onclick=renderTeamFilters;
 $('teamBackFive').onclick=()=>{$('teamVideo').currentTime=Math.max(0,$('teamVideo').currentTime-5)};
+$('teamForwardFive').onclick=()=>{const v=$('teamVideo');v.currentTime=Math.min(Number.isFinite(v.duration)?v.duration:Infinity,v.currentTime+5)};
 $('teamLinkTime').onclick=()=>{
  const row=teamRows.find(r=>teamKey(r)===teamSelectedKey),video=$('teamVideo');
  if(!row){alert('まず一覧からスパイクを選んでください');return}
