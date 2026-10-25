@@ -4,7 +4,7 @@
 <style>
 :root{font-family:system-ui,-apple-system,sans-serif;color:#172c33;background:#f3f7f8}*{box-sizing:border-box}body{margin:0}header{background:#113c47;color:white;padding:18px 20px}h1{font-size:22px;margin:0}h2{font-size:18px;margin:0 0 12px}.sub{color:#d0e6e7;font-size:13px}main{max-width:1300px;margin:auto;padding:14px;display:grid;gap:14px}.card{background:white;border:1px solid #d8e3e5;border-radius:12px;padding:16px}#matches{display:flex;flex-wrap:wrap;gap:8px}#matches label{border:1px solid #cadcde;border-radius:8px;padding:10px}select,button,input[type=file]{min-height:42px;font:inherit}select,button{border:1px solid #b9cbce;border-radius:8px;padding:7px 12px;background:white}button{cursor:pointer}button.primary{background:#12697b;color:white}.filters{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.filters label{display:grid;gap:4px;font-size:14px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}svg{background:#f8fbfb;width:100%;height:auto;border-radius:8px;max-height:540px}video{width:100%;background:#07171d;border-radius:8px}#clips{max-height:240px;overflow:auto}#clips button{display:block;width:100%;text-align:left;margin:5px 0}.note{color:#56727c;font-size:13px}.summary{font-weight:600;margin:12px 0}#status{min-height:25px}.vfiles{display:grid;gap:9px;margin-top:12px}.vfiles label{display:grid;gap:4px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}}</style></head>
 <body><header><h1>🏐 Opponent Scout Video Lab</h1><div class="sub">複数試合の選手別コース × 動画連続再生（試作版）</div></header>
-<main><section class="card"><h2>① 試合の選択</h2><p class="note">同じブラウザーのOpponent Scout保存データを読み取り専用で表示します。別のiPad・パソコンの記録は自動では移りません。</p><div class="filters"><label>Opponent Scoutの全試合JSONファイルを読み込む<input id="importData" type="file" accept=".json,application/json"></label><button id="useLocal" type="button">この端末の保存データを表示</button></div><p class="note">元のアプリの「設定/出力 → 全試合をJSON保存」で保存したファイルを選択してください。読み込みはこの画面だけで行い、元の記録は変更しません。</p><div id="matches"></div><p id="importStatus" class="note" role="status"></p><p id="dataDetails" class="note" aria-live="polite"></p></section>
+<main><section class="card"><h2>① 試合の選択</h2><p class="note">同じブラウザーのOpponent Scout保存データを読み取り専用で表示します。別のiPad・パソコンの記録は自動では移りません。</p><div class="filters"><label>Opponent Scoutの試合ごとのJSONファイルを追加で読み込む（複数選択可）<input id="importData" type="file" accept=".json,application/json" multiple></label><button id="useLocal" type="button">この端末の保存データを表示</button><button id="clearImports" type="button">読み込んだ試合をクリア</button></div><p class="note">元のアプリの「選んだ試合をVideo Lab用JSON保存」で試合ごとに保存し、必要なファイルだけ読み込んでください。後から追加もできます。元の記録は変更しません。</p><div id="matches"></div><p id="importStatus" class="note" role="status"></p><p id="dataDetails" class="note" aria-live="polite"></p></section>
 <section class="card"><h2>② 個人・ローテーションの絞り込み</h2><div class="filters">
 <label>背番号<select id="player"></select></label><label>ローテーション<select id="rot"><option value="all">S1〜S6（全部）</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></label>
 <label>攻撃種類<select id="attack"><option value="all">全種類</option></select></label><label>結果<select id="result"><option value="all">すべて</option><option>決定</option><option>継続</option><option>ミス</option><option>被ブロック</option></select></label>
@@ -21,15 +21,38 @@ function getData(m){if(m.id===idx.activeId)return db;try{return JSON.parse(local
 function textStatus(t){$('status').textContent=t}
 function renderMatchChoices(){
  $('matches').replaceChildren();
- matches.forEach(({m,data})=>{let label=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.value=m.id;c.checked=true;c.addEventListener('change',rebuild);label.append(c,document.createTextNode(' '+(m.name||data.settings?.name||'試合')+' / '+(m.date||'')));$('matches').append(label)});
+ matches.forEach(({m,data})=>{let label=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.value=m.id;c.checked=true;c.addEventListener('change',rebuild);label.append(c,document.createTextNode(' '+(m.name||data.settings?.name||'試合')+' / '+(m.date||'')));const remove=document.createElement('button');remove.type='button';remove.textContent='除外';remove.style.marginLeft='8px';remove.onclick=()=>{matches=matches.filter(x=>x.m.id!==m.id);const url=videoUrls.get(m.id);if(url)URL.revokeObjectURL(url);videoUrls.delete(m.id);renderMatchChoices()};label.append(remove);$('matches').append(label)});
  rebuild();
 }
 function loadLocal(){imported=false;matches=idx?.matches?.length?idx.matches.map(m=>({m,data:getData(m)})).filter(x=>x.data?.plays):[];try{times=JSON.parse(localStorage.getItem(TIMES)||'{}')||{}}catch(e){times={}};renderMatchChoices();$('importStatus').textContent=matches.length?'この端末の'+matches.length+'試合を表示しています。':'この端末に試合がありません。「全試合JSON」を読み込んでください。'}
 function readJsonFile(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>{try{resolve(JSON.parse(reader.result))}catch(err){reject(new Error('JSONファイルの内容を解析できません：'+err.message))}};reader.onerror=()=>reject(new Error('ファイルを開けませんでした'));reader.readAsText(file,'UTF-8')})}
 function setup(){
  $('useLocal').onclick=loadLocal;
- $('importData').addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{const payload=await readJsonFile(file);let next=[];let newTimes={};if(payload.format==='opponentScoutAllMatchesV1'&&Array.isArray(payload.matches)&&payload.matches.length){if(payload.matches.length>500||payload.matches.some(m=>!m||!m.data||!Array.isArray(m.data.plays)||!m.data.settings))throw Error('試合データの形式が正しくありません');next=payload.matches.map((m,i)=>({m:{id:String(m.id||'import_'+i),name:String(m.name||m.data.settings.name||'試合'),date:String(m.date||'')},data:m.data}));newTimes=payload.videoTimes&&typeof payload.videoTimes==='object'&&!Array.isArray(payload.videoTimes)?payload.videoTimes:{}}else if(payload.settings&&Array.isArray(payload.plays)){next=[{m:{id:'single_import',name:String(payload.settings.name||file.name),date:''},data:payload}]}else throw Error('Opponent Scoutの「全試合JSON保存」ファイルを選択してください');
-  run++;$('video').pause();matches=next;times=newTimes;imported=true;for(const url of videoUrls.values())URL.revokeObjectURL(url);videoUrls.clear();$('video').removeAttribute('src');$('video').load();renderMatchChoices();$('importStatus').textContent='✓ '+file.name+' を読み込みました（'+matches.length+'試合）。試合を選んでから、各試合の動画ファイルを選択してください。'+(Object.keys(times).length?' 動画の記録時刻も読込済み。':' ※このJSONには動画の記録時刻が含まれていません。')}catch(err){$('importStatus').textContent='読み込み失敗：'+err.message}finally{e.target.value=''}});
+ $('clearImports').onclick=()=>{run++;$('video').pause();for(const url of videoUrls.values())URL.revokeObjectURL(url);videoUrls.clear();matches=[];times={};imported=true;renderMatchChoices();$('importStatus').textContent='読み込んだ試合をクリアしました。'};
+ $('importData').addEventListener('change',async e=>{
+  const files=[...(e.target.files||[])];if(!files.length)return;
+  let added=0,errors=[];
+  for(const file of files){
+   try{
+    const payload=await readJsonFile(file);let next=[],newTimes={};
+    if(payload.format==='opponentScoutAllMatchesV1'&&Array.isArray(payload.matches)&&payload.matches.length){
+     if(payload.matches.length>500||payload.matches.some(m=>!m||!m.data||!Array.isArray(m.data.plays)||!m.data.settings))throw Error('試合データの形式が正しくありません');
+     next=payload.matches.map((m,i)=>({m:{id:String(m.id||'import_'+i),name:String(m.name||m.data.settings.name||'試合'),date:String(m.date||'')},data:m.data}));
+     newTimes=payload.videoTimes&&typeof payload.videoTimes==='object'&&!Array.isArray(payload.videoTimes)?payload.videoTimes:{};
+    }else if(payload.settings&&Array.isArray(payload.plays)){
+     next=[{m:{id:'legacy_'+file.name.replace(/[^a-zA-Z0-9]/g,'_'),name:String(payload.settings.name||file.name),date:''},data:payload}];
+    }else throw Error('Opponent ScoutのJSONではありません');
+    for(const entry of next){
+     const existing=matches.findIndex(x=>x.m.id===entry.m.id);
+     if(existing>=0){matches[existing]=entry}else{matches.push(entry);added++}
+    }
+    Object.assign(times,newTimes);
+   }catch(err){errors.push(file.name+'：'+err.message)}
+  }
+  if(added||files.length>errors.length){run++;$('video').pause();imported=true;renderMatchChoices()}
+  $('importStatus').textContent='JSON読込：'+added+'試合追加 / 現在'+matches.length+'試合。'+(Object.keys(times).length?' 再生時刻あり。':' 再生時刻なし。')+(errors.length?' エラー：'+errors.join(' / '):'');
+  e.target.value='';
+ });
 
  $('matches').replaceChildren();
  ['player','rot','attack','result'].forEach(id=>$(id).addEventListener('change',rebuild));
