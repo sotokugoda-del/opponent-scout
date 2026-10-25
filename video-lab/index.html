@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Opponent Scout Video Lab</title>
+<style>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#172c33;background:#f3f7f8}*{box-sizing:border-box}body{margin:0}header{background:#113c47;color:white;padding:18px 20px}h1{font-size:22px;margin:0}h2{font-size:18px;margin:0 0 12px}.sub{color:#d0e6e7;font-size:13px}main{max-width:1300px;margin:auto;padding:14px;display:grid;gap:14px}.card{background:white;border:1px solid #d8e3e5;border-radius:12px;padding:16px}#matches{display:flex;flex-wrap:wrap;gap:8px}#matches label{border:1px solid #cadcde;border-radius:8px;padding:10px}select,button,input[type=file]{min-height:42px;font:inherit}select,button{border:1px solid #b9cbce;border-radius:8px;padding:7px 12px;background:white}button{cursor:pointer}button.primary{background:#12697b;color:white}.filters{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.filters label{display:grid;gap:4px;font-size:14px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}svg{background:#f8fbfb;width:100%;height:auto;border-radius:8px;max-height:540px}video{width:100%;background:#07171d;border-radius:8px}#clips{max-height:240px;overflow:auto}#clips button{display:block;width:100%;text-align:left;margin:5px 0}.note{color:#56727c;font-size:13px}.summary{font-weight:600;margin:12px 0}#status{min-height:25px}.vfiles{display:grid;gap:9px;margin-top:12px}.vfiles label{display:grid;gap:4px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}}</style></head>
+<body><header><h1>🏐 Opponent Scout Video Lab</h1><div class="sub">複数試合の選手別コース × 動画連続再生（試作版）</div></header>
+<main><section class="card"><h2>① 試合の選択</h2><p class="note">同じブラウザーのOpponent Scout保存データを読み取り専用で表示します。別のiPad・パソコンの記録は自動では移りません。</p><div id="matches"></div><p id="importStatus" class="note"></p></section>
+<section class="card"><h2>② 個人・ローテーションの絞り込み</h2><div class="filters">
+<label>背番号<select id="player"></select></label><label>ローテーション<select id="rot"><option value="all">S1〜S6（全部）</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></label>
+<label>攻撃種類<select id="attack"><option value="all">全種類</option></select></label><label>結果<select id="result"><option value="all">すべて</option><option>決定</option><option>継続</option><option>ミス</option><option>被ブロック</option></select></label>
+</div><div id="stats" class="summary"></div></section>
+<div class="layout"><section class="card"><h2>③ 選択した試合のコース</h2><svg id="court" viewBox="0 0 500 650" role="img" aria-label="選手別スパイクコース図"><rect x="0" y="0" width="500" height="650" fill="#ecf5f4"/><g id="lines"></g></svg><p class="note">赤：決定　青：継続・被ブロック　灰：ミス。線は全選択試合を重ねて表示します。</p></section>
+<section class="card"><h2>④ スパイク動画</h2><video id="video" playsinline controls preload="metadata"></video><div class="filters" style="margin:10px 0"><button class="primary" id="play">選択したスパイクを連続再生</button><button id="stop">停止</button></div><div id="status" class="note"></div><p class="note">各試合の動画を選んでください。記録時刻の2秒前から再生します。ファイル自体はアップロードしません。</p><div id="videos" class="vfiles"></div><div id="clips"></div></section></div></main>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const KEY='opponentScoutIPadDemoV1', INDEX='opponentScoutMatchIndexV1',PREFIX='opponentScoutMatchDataV1_',TIMES='opponentScoutVideoTimesV1';
+let idx,db,times={},matches=[],rows=[],playlist=[],position=-1,videoUrls=new Map(),run=0;
+try{idx=JSON.parse(localStorage.getItem(INDEX)||'null');db=JSON.parse(localStorage.getItem(KEY)||'null');times=JSON.parse(localStorage.getItem(TIMES)||'{}')||{}}catch(e){}
+function getData(m){if(m.id===idx.activeId)return db;try{return JSON.parse(localStorage.getItem(PREFIX+m.id)||'null')}catch(e){return null}}
+function textStatus(t){$('status').textContent=t}
+function setup(){
+ if(!idx?.matches?.length){$('matches').textContent='このブラウザーで保存された試合が見つかりません。';$('importStatus').textContent='別端末のデータを表示するにはエクスポート／インポート機能を追加する必要があります。';return}
+ matches=idx.matches.map(m=>({m,data:getData(m)})).filter(x=>x.data?.plays);
+ $('matches').replaceChildren();
+ matches.forEach(({m,data})=>{let label=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.value=m.id;c.checked=true;c.addEventListener('change',rebuild);
+ label.append(c,document.createTextNode(' '+(m.name||data.settings?.name||'試合')+' / '+(m.date||'')));$('matches').append(label)});
+ ['player','rot','attack','result'].forEach(id=>$(id).addEventListener('change',rebuild));
+ $('play').addEventListener('click',()=>{run++;position=-1;playlist=rows.filter(r=>Number.isFinite(r.seconds)&&videoUrls.has(r.matchId));if(!playlist.length){textStatus('動画と時刻が揃ったスパイクがありません。');return}playNext(run)});
+ $('stop').addEventListener('click',()=>{run++;$('video').pause();textStatus('停止しました')});
+ $('video').addEventListener('ended',()=>{if(position>=0)playNext(run)});
+ rebuild();
+}
+function option(select,value,title){let o=document.createElement('option');o.value=value;o.textContent=title;select.append(o)}
+function rebuild(){
+ let selected=new Set([...$('matches').querySelectorAll('input:checked')].map(n=>n.value));
+ const all=matches.filter(x=>selected.has(x.m.id)).flatMap(({m,data})=>data.plays.flatMap((p,index)=>p.type==='アタック'?[{p,index,matchId:m.id,name:m.name,seconds:Number(times[m.id+':'+(p.id!=null?p.id:'index'+index)])}]:[]));
+ let sel=$('player'),current=sel.value,players=[...new Set(all.map(r=>Number(r.p.player)).filter(Number.isFinite))].sort((a,b)=>a-b);sel.replaceChildren();players.forEach(p=>option(sel,String(p),'#'+p));if(players.includes(Number(current)))sel.value=current;
+ let attack=$('attack'),prev=attack.value;attack.replaceChildren();option(attack,'all','全種類');[...new Set(all.map(r=>r.p.attack).filter(Boolean))].sort().forEach(a=>option(attack,a,a));attack.value=[...attack.options].some(o=>o.value===prev)?prev:'all';
+ rows=all.filter(r=>String(r.p.player)===sel.value&&($('rot').value==='all'||r.p.rot===$('rot').value)&& (attack.value==='all'||r.p.attack===attack.value)&&($('result').value==='all'||r.p.result===$('result').value));
+ const kills=rows.filter(r=>r.p.result==='決定').length;
+ $('stats').textContent=selected.size+'試合を選択 ／ '+rows.length+'本 ／ 決定 '+kills+'本 ／ 決定率 '+(rows.length?(100*kills/rows.length).toFixed(1):'0')+'%';
+ draw();renderVideos(selected);renderClips();
+}
+function draw(){
+ const g=$('lines');g.replaceChildren();
+ const ns='http://www.w3.org/2000/svg';
+ function el(tag,attrs){let node=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v));g.append(node);return node}
+ // Original normalized court coordinates (0–1). Preserve the source projection.
+ for(let i=0;i<=6;i++){el('line',{x1:0,y1:i*650/6,x2:500,y2:i*650/6,stroke:'#aac7c7','stroke-width':1});el('line',{x1:i*500/6,y1:0,x2:i*500/6,y2:650,stroke:'#aac7c7','stroke-width':1})}
+ rows.forEach(({p})=>{if(!p.a||!p.b)return;const pts=[p.a,p.b,...(p.c?[p.c]:[])];if(pts.some(q=>!Number.isFinite(q.x)||!Number.isFinite(q.y)))return;
+ el('polyline',{points:pts.map(q=>(q.x*500)+','+(q.y*650)).join(' '),fill:'none',stroke:p.result==='決定'?'#b72f40':p.result==='ミス'?'#6b737c':'#2d6bcb','stroke-width':2.5,opacity:.65,'stroke-linecap':'round'});
+ el('circle',{cx:p.b.x*500,cy:p.b.y*650,r:3,fill:p.result==='決定'?'#b72f40':'#305a75'});
+ })
+}
+function renderVideos(selected){
+ const root=$('videos');root.replaceChildren();matches.filter(x=>selected.has(x.m.id)).forEach(({m})=>{
+ const label=document.createElement('label');label.textContent=(m.name||'試合')+'：動画ファイル';
+ const input=document.createElement('input');input.type='file';input.accept='video/*';input.addEventListener('change',()=>{const old=videoUrls.get(m.id);if(old)URL.revokeObjectURL(old);if(input.files[0])videoUrls.set(m.id,URL.createObjectURL(input.files[0]));else videoUrls.delete(m.id);renderClips()});label.append(input);root.append(label)
+ });
+}
+function renderClips(){
+ const root=$('clips');root.replaceChildren();rows.forEach((r,i)=>{let b=document.createElement('button');b.textContent=(i+1)+'. '+r.name+' / '+r.p.rot+' / '+(r.p.attack||'')+' / '+(r.p.result||'')+(Number.isFinite(r.seconds)?' / '+r.seconds.toFixed(1)+'秒':' / 時刻未登録');
+ b.addEventListener('click',()=>{if(!videoUrls.has(r.matchId)||!Number.isFinite(r.seconds)){textStatus('この試合の動画または記録時刻がありません。');return}run++;playlist=[r];position=-1;playNext(run)});root.append(b)})
+}
+async function playNext(token){
+ if(token!==run)return;position++;if(position>=playlist.length){position=-1;textStatus('選択したスパイクの再生が終了しました');return}
+ const r=playlist[position],video=$('video'),url=videoUrls.get(r.matchId);if(!url){playNext(token);return}
+ if(video.src!==url){video.src=url;video.load();await new Promise(resolve=>{if(video.readyState>=1)return resolve();video.addEventListener('loadedmetadata',resolve,{once:true});video.addEventListener('error',resolve,{once:true})})}
+ if(token!==run)return;
+ const t=Math.max(0,r.seconds-2);
+ try{video.currentTime=Math.min(t,Number.isFinite(video.duration)?Math.max(0,video.duration-.1):t);await video.play();textStatus((position+1)+' / '+playlist.length+'：'+r.name+' #'+r.p.player+' '+r.p.attack+' （記録の2秒前から）')}
+ catch(e){textStatus('再生が制限されました。動画の▶ボタンを押してください。')}
+ // Do not cut at an arbitrary duration: progress to next scene when the current playback segment has advanced 4 seconds.
+ const target=t+4;
+ const advance=()=>{video.removeEventListener('timeupdate',advance);if(position>=0&&token===run)playNext(token)};
+ let armed=false;
+ const ontime=()=>{if(token!==run){video.removeEventListener('timeupdate',ontime);return}if(video.currentTime>=target){video.removeEventListener('timeupdate',ontime);advance()}};
+ video.addEventListener('timeupdate',ontime);
+}
+setup();
+})();
+</script></body></html>
