@@ -1144,7 +1144,7 @@ function renderTeamSpikeList(){
   const btn=document.createElement('button');btn.className='btn';btn.textContent=(i+1)+'．'+row.matchName+' '+(row.p.rot||'-')+' / '+(row.p.attack||'-')+' / '+(row.p.result||'-');
   btn.onclick=()=>{teamSelectedKey=key;$('teamVideoMatch').value=row.matchId;renderTeamSpikeList();if(Number.isFinite(seconds))teamSeek(row,false)};
   el.append(btn);
-  const edit=document.createElement('button');edit.className='btn teamSpikeEdit';edit.type='button';edit.textContent='背番号を修正';edit.onclick=()=>teamEditSpikePlayer(row);el.append(edit);
+  const edit=document.createElement('button');edit.className='btn teamSpikeEdit';edit.type='button';edit.textContent='選手・攻撃種類を修正';edit.onclick=()=>teamEditSpikePlayer(row);el.append(edit);
   const time=document.createElement('span');time.className='small';time.textContent=Number.isFinite(seconds)?'🎬 '+Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'動画未紐づけ';el.append(time);
   root.append(el)
  })
@@ -1152,21 +1152,29 @@ function renderTeamSpikeList(){
 function teamEditSpikePlayer(row){
  const match=matchIndex.matches.find(m=>m.id===row.matchId),data=match&&teamMatchData(match);
  if(!data||!Array.isArray(data.plays)||!data.plays[row.index]){alert('元の試合記録が見つかりません。');return}
- const current=Number(data.plays[row.index].player);
+ const play=data.plays[row.index],current=Number(play.player),currentAttack=play.attack||'';
  const available=[...new Set([...(data.settings.players||[]).map(Number),current])].filter(n=>Number.isInteger(n)&&n>0).sort((a,b)=>a-b);
- const answer=prompt('修正後の背番号を入力してください。\\n登録選手：'+available.map(n=>'#'+n).join('、'),String(current));
+ const answer=prompt('修正後の背番号を入力してください。変更しない場合はそのまま確定してください。\\n登録選手：'+available.map(n=>'#'+n).join('、'),String(current));
  if(answer===null)return;
  const next=Number(answer.trim().replace(/^#/,''));
  if(!Number.isInteger(next)||!available.includes(next)){alert('登録済みの正しい背番号を入力してください。');return}
- if(next===current)return;
- if(!confirm(row.matchName+' のスパイクを #'+current+' → #'+next+' に変更しますか？'))return;
- data.plays[row.index].player=next;
+ const attacks=[...new Set([...(data.settings.attackOrder||[]),currentAttack].filter(Boolean))];
+ const attackAnswer=prompt('修正後の攻撃種類を選んで番号を入力してください。\\n'+attacks.map((a,i)=>(i+1)+'．'+a).join('\\n'),String(Math.max(0,attacks.indexOf(currentAttack))+1));
+ if(attackAnswer===null)return;
+ const attackNumber=Number(attackAnswer.trim());
+ if(!Number.isInteger(attackNumber)||attackNumber<1||attackNumber>attacks.length){alert('一覧にある攻撃種類の番号を入力してください。');return}
+ const nextAttack=attacks[attackNumber-1];
+ if(next===current&&nextAttack===currentAttack)return;
+ if(!confirm(row.matchName+' の記録を #'+current+' / '+currentAttack+' → #'+next+' / '+nextAttack+' に変更しますか？'))return;
+ const oldStart=play.a?{...play.a}:play.a;
+ play.player=next;play.attack=nextAttack;
+ if(nextAttack!==currentAttack){const start=data.settings.attackPositions&&data.settings.attackPositions[nextAttack];if(start)play.a={x:start.x,y:start.y}}
  try{
   if(row.matchId===matchIndex.activeId){saveDB();archiveCurrentMatch();renderPlayers();renderAnalysis()}
   else localStorage.setItem(MATCH_DATA_PREFIX+row.matchId,JSON.stringify(data));
- }catch(err){data.plays[row.index].player=current;alert('記録を保存できませんでした。空き容量を確認してください。');return}
+ }catch(err){play.player=current;play.attack=currentAttack;play.a=oldStart;alert('記録を保存できませんでした。空き容量を確認してください。');return}
  teamSequence=[];teamSequencePos=-1;$('teamVideo').pause();
- $('teamVideoStatus').textContent='✓ '+row.matchName+'：#'+current+' → #'+next+' に修正しました。動画の時刻は維持しています。';
+ $('teamVideoStatus').textContent='✓ '+row.matchName+'：#'+next+' / '+nextAttack+' に修正しました。動画の時刻は維持しています。';
  renderTeamAnalysis()
 }
 function teamSetVideoFile(file){
