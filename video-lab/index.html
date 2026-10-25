@@ -40,13 +40,13 @@ function setup(){
 function option(select,value,title){let o=document.createElement('option');o.value=value;o.textContent=title;select.append(o)}
 function rebuild(){
  let selected=new Set([...$('matches').querySelectorAll('input:checked')].map(n=>n.value));
- const all=matches.filter(x=>selected.has(x.m.id)).flatMap(({m,data})=>data.plays.flatMap((p,index)=>p.type==='アタック'?[{p,index,matchId:m.id,name:m.name,seconds:(()=>{const t=times[m.id+':'+(p.id!=null?p.id:'index'+index)];return t==null?NaN:Number(t)})()}]:[]));
- let sel=$('player'),current=sel.value,players=[...new Set(all.map(r=>Number(r.p.player)).filter(Number.isFinite))].sort((a,b)=>a-b);sel.replaceChildren();players.forEach(p=>option(sel,String(p),'#'+p));if(players.includes(Number(current)))sel.value=current;
+ const all=matches.filter(x=>selected.has(x.m.id)).flatMap(({m,data})=>data.plays.flatMap((p,index)=>(p.type==='アタック'||(!p.type&&p.attack))?[{p,index,matchId:m.id,name:m.name,seconds:(()=>{const t=times[m.id+':'+(p.id!=null?p.id:'index'+index)];return t==null?NaN:Number(t)})()}]:[]));
+ let sel=$('player'),current=sel.value,players=[...new Set([...matches.filter(x=>selected.has(x.m.id)).flatMap(x=>x.data.settings?.players||[]),...all.map(r=>r.p.player)].map(Number).filter(n=>Number.isInteger(n)&&n>0))].sort((a,b)=>a-b);sel.replaceChildren();option(sel,'all','全選手');players.forEach(p=>option(sel,String(p),'#'+p));sel.value=(current==='all'||players.some(p=>String(p)===current))?current:'all';sel.disabled=!players.length;
  let attack=$('attack'),prev=attack.value;attack.replaceChildren();option(attack,'all','全種類');[...new Set(all.map(r=>r.p.attack).filter(Boolean))].sort().forEach(a=>option(attack,a,a));attack.value=[...attack.options].some(o=>o.value===prev)?prev:'all';
- rows=all.filter(r=>String(r.p.player)===sel.value&&($('rot').value==='all'||r.p.rot===$('rot').value)&& (attack.value==='all'||r.p.attack===attack.value)&&($('result').value==='all'||r.p.result===$('result').value));
+ rows=all.filter(r=>(sel.value==='all'||String(r.p.player)===sel.value)&&($('rot').value==='all'||r.p.rot===$('rot').value)&& (attack.value==='all'||r.p.attack===attack.value)&&($('result').value==='all'||r.p.result===$('result').value));
  const kills=rows.filter(r=>r.p.result==='決定').length;
  $('stats').textContent=selected.size+'試合を選択 ／ '+rows.length+'本 ／ 決定 '+kills+'本 ／ 決定率 '+(rows.length?(100*kills/rows.length).toFixed(1):'0')+'%';
- draw();renderVideos(selected);renderClips();
+ if(!players.length)$('importStatus').textContent='選択した試合に選手が登録されていません。元のアプリの設定から背番号を登録して保存してください。';draw();renderVideos(selected);renderClips();
 }
 function draw(){
  const g=$('lines');g.replaceChildren();
