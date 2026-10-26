@@ -2,14 +2,14 @@
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Opponent Scout Video Lab</title>
 <style>
-:root{font-family:system-ui,-apple-system,sans-serif;color:#172c33;background:#f3f7f8}*{box-sizing:border-box}body{margin:0}header{background:#113c47;color:white;padding:18px 20px}h1{font-size:22px;margin:0}h2{font-size:18px;margin:0 0 12px}.sub{color:#d0e6e7;font-size:13px}main{max-width:1300px;margin:auto;padding:14px;display:grid;gap:14px}.card{background:white;border:1px solid #d8e3e5;border-radius:12px;padding:16px}#matches{display:flex;flex-wrap:wrap;gap:8px}#matches label{border:1px solid #cadcde;border-radius:8px;padding:10px}select,button,input[type=file]{min-height:42px;font:inherit}select,button{border:1px solid #b9cbce;border-radius:8px;padding:7px 12px;background:white}button{cursor:pointer}button.primary{background:#12697b;color:white}.filters{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.filters label{display:grid;gap:4px;font-size:14px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}svg{background:#f8fbfb;width:100%;height:auto;border-radius:8px;max-height:540px}video{width:100%;background:#07171d;border-radius:8px}#clips{max-height:240px;overflow:auto}#clips button{display:block;width:100%;text-align:left;margin:5px 0}.note{color:#56727c;font-size:13px}.summary{font-weight:600;margin:12px 0}#status{min-height:25px}.vfiles{display:grid;gap:9px;margin-top:12px}.vfiles label{display:grid;gap:4px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}}</style></head>
+:root{font-family:system-ui,-apple-system,sans-serif;color:#172c33;background:#f3f7f8}*{box-sizing:border-box}body{margin:0}header{background:#113c47;color:white;padding:18px 20px}h1{font-size:22px;margin:0}h2{font-size:18px;margin:0 0 12px}.sub{color:#d0e6e7;font-size:13px}main{max-width:1300px;margin:auto;padding:14px;display:grid;gap:14px}.card{background:white;border:1px solid #d8e3e5;border-radius:12px;padding:16px}#matches{display:flex;flex-wrap:wrap;gap:8px}#matches label{border:1px solid #cadcde;border-radius:8px;padding:10px}select,button,input[type=file]{min-height:42px;font:inherit}select,button{border:1px solid #b9cbce;border-radius:8px;padding:7px 12px;background:white}button{cursor:pointer}button.primary{background:#12697b;color:white}.filters{display:flex;flex-wrap:wrap;align-items:end;gap:12px}.filters label{display:grid;gap:4px;font-size:14px}.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}svg{display:block;background:#c5eaf5;width:min(100%,300px);height:auto;aspect-ratio:1/2;margin:8px auto 12px;border:5px solid #fff;border-radius:3px;box-shadow:0 0 0 6px #c5eaf5;overflow:hidden}video{width:100%;background:#07171d;border-radius:8px}#clips{max-height:240px;overflow:auto}#clips button{display:block;width:100%;text-align:left;margin:5px 0}.note{color:#56727c;font-size:13px}.summary{font-weight:600;margin:12px 0}#status{min-height:25px}.vfiles{display:grid;gap:9px;margin-top:12px}.vfiles label{display:grid;gap:4px;font-size:13px}@media(max-width:850px){.layout{grid-template-columns:1fr}}</style></head>
 <body><header><h1>🏐 Opponent Scout Video Lab</h1><div class="sub">複数試合の選手別コース × 動画連続再生（試作版）</div></header>
 <main><section class="card"><h2>① 試合の選択</h2><p class="note">同じブラウザーのOpponent Scout保存データを読み取り専用で表示します。別のiPad・パソコンの記録は自動では移りません。</p><div class="filters"><label>Opponent Scoutの試合ごとのJSONファイルを追加で読み込む（複数選択可）<input id="importData" type="file" accept=".json,application/json" multiple></label><button id="useLocal" type="button">この端末の保存データを表示</button><button id="clearImports" type="button">読み込んだ試合をクリア</button></div><p class="note">元のアプリの「選んだ試合をVideo Lab用JSON保存」で試合ごとに保存し、必要なファイルだけ読み込んでください。後から追加もできます。元の記録は変更しません。</p><div id="matches"></div><p id="importStatus" class="note" role="status"></p><p id="dataDetails" class="note" aria-live="polite"></p></section>
 <section class="card"><h2>② 個人・ローテーションの絞り込み</h2><div class="filters">
 <label>背番号<select id="player"></select></label><label>ローテーション<select id="rot"><option value="all">S1〜S6（全部）</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option><option>S5</option><option>S6</option></select></label>
 <label>攻撃種類<select id="attack"><option value="all">全種類</option></select></label><label>結果<select id="result"><option value="all">すべて</option><option>決定</option><option>継続</option><option>ミス</option><option>被ブロック</option></select></label>
 </div><div id="stats" class="summary"></div></section>
-<div class="layout"><section class="card"><h2>③ 選択した試合のコース</h2><svg id="court" viewBox="0 0 500 650" role="img" aria-label="選手別スパイクコース図"><rect x="0" y="0" width="500" height="650" fill="#ecf5f4"/><g id="lines"></g></svg><p class="note">赤：決定　青：継続・被ブロック　灰：ミス。線は全選択試合を重ねて表示します。</p></section>
+<div class="layout"><section class="card"><h2>③ 選択した試合のコース</h2><svg id="court" viewBox="0 0 450 900" role="img" aria-label="選手別スパイクコース図"><rect x="0" y="0" width="450" height="900" fill="#f5bd89"/><g id="lines"></g></svg><p class="note">赤：決定　青：継続・被ブロック　灰：ミス。線は全選択試合を重ねて表示します。</p></section>
 <section class="card"><h2>④ スパイク動画</h2><video id="video" playsinline controls preload="metadata"></video><div class="filters" style="margin:10px 0"><button class="primary" id="play">選択したスパイクを連続再生</button><button id="stop">停止</button></div><div id="status" class="note"></div><p class="note">各試合の動画を選んでください。記録時刻の2秒前から再生します。ファイル自体はアップロードしません。</p><div id="videos" class="vfiles"></div><div id="clips"></div></section></div></main>
 <script>
 (()=>{'use strict';
@@ -76,11 +76,20 @@ function draw(){
  const g=$('lines');g.replaceChildren();
  const ns='http://www.w3.org/2000/svg';
  function el(tag,attrs){let node=document.createElementNS(ns,tag);Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v));g.append(node);return node}
- // Original normalized court coordinates (0–1). Preserve the source projection.
- for(let i=0;i<=6;i++){el('line',{x1:0,y1:i*650/6,x2:500,y2:i*650/6,stroke:'#aac7c7','stroke-width':1});el('line',{x1:i*500/6,y1:0,x2:i*500/6,y2:650,stroke:'#aac7c7','stroke-width':1})}
+ // 9m × 18m regulation court: full-court coordinates are normalized to 0–1.
+ // Net at 9m, attack lines 3m from the net on both sides (y=300 and 600).
+ el('rect',{x:1,y:1,width:448,height:898,fill:'none',stroke:'#fff','stroke-width':3});
+ [300,600].forEach(y=>el('line',{x1:0,y1:y,x2:450,y2:y,stroke:'#fff','stroke-width':3}));
+ // The lower (opponent landing) half is split into 6×6 scouting cells.
+ for(let i=1;i<6;i++){
+  el('line',{x1:i*75,y1:450,x2:i*75,y2:900,stroke:'rgba(255,255,255,.38)','stroke-width':i===2||i===4?2:1});
+  el('line',{x1:0,y1:450+i*75,x2:450,y2:450+i*75,stroke:'rgba(255,255,255,.38)','stroke-width':i===2||i===4?2:1});
+ }
+ el('line',{x1:0,y1:450,x2:450,y2:450,stroke:'#172c33','stroke-width':6});
+
  rows.forEach(({p})=>{if(!p.a||!p.b)return;const pts=[p.a,p.b,...(p.c?[p.c]:[])];if(pts.some(q=>!Number.isFinite(q.x)||!Number.isFinite(q.y)))return;
- el('polyline',{points:pts.map(q=>(q.x*500)+','+(q.y*650)).join(' '),fill:'none',stroke:p.result==='決定'?'#b72f40':p.result==='ミス'?'#6b737c':'#2d6bcb','stroke-width':2.5,opacity:.65,'stroke-linecap':'round'});
- el('circle',{cx:p.b.x*500,cy:p.b.y*650,r:3,fill:p.result==='決定'?'#b72f40':'#305a75'});
+ el('polyline',{points:pts.map(q=>(q.x*450)+','+(q.y*900)).join(' '),fill:'none',stroke:p.result==='決定'?'#b72f40':p.result==='ミス'?'#6b737c':'#2d6bcb','stroke-width':2.5,opacity:.65,'stroke-linecap':'round'});
+ el('circle',{cx:p.b.x*450,cy:p.b.y*900,r:3,fill:p.result==='決定'?'#b72f40':'#305a75'});
  })
 }
 function renderVideos(selected){
