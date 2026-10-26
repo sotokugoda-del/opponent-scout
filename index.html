@@ -312,7 +312,7 @@ body.ipadStandalone header{top:0}
 #analysis .attackHeatLegend i.high{background:#1250ad;border:1px solid #72b7ff}
 /* v81: correct mistaken player assignment from linked spike video list */
 .teamSpikeEdit{font-size:11px!important;padding:6px 9px!important;background:#36566a;border-color:#7193a5}
-</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v88</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="team">チーム総合</button><button class="btn" data-page="settings">設定/出力</button></div></header>
+</style></head><body><header><div class="brand">🏐 Opponent Scout <span class="small">iPad · v89</span></div><div class="tabs"><button class="btn on" data-page="record">記録</button><button class="btn" data-page="analysis">S1–S6分析</button><button class="btn" data-page="players">選手別</button><button class="btn" data-page="team">チーム総合</button><button class="btn" data-page="settings">設定/出力</button></div></header>
 <section id="record" class="page on"><div class="matchQuickActions"><span id="activeMatchQuickLabel" class="small"></span><button class="btn on" id="saveAndNewMatch" type="button" hidden>💾 この試合を保存して新規試合</button></div><div class="videoStudyToggle"><button class="btn" id="videoStudyToggle" type="button" aria-pressed="false">🎬 動画を見ながら記録</button><span class="small">通常の試合中はOFFのまま使えます。</span></div><div id="videoStudyLayout"><div id="videoStudyPanel" hidden><div class="title">🎬 動画分析モード</div><div class="small">この試合の動画を選び、一時停止してスパイクを記録。保存時に再生時刻も自動で紐づきます。</div><input type="file" id="videoStudyFile" accept="video/*"><video id="videoStudyPlayer" controls playsinline preload="metadata"></video><div class="videoStudyButtons"><button class="btn" id="videoStudyBack" type="button">−5秒</button><button class="btn" id="videoStudyFrameBack" type="button">−0.1秒</button><button class="btn" id="videoStudyFrameNext" type="button">＋0.1秒</button><button class="btn" id="videoStudyForward" type="button">＋5秒</button><button class="btn on" id="videoStudyPlay" type="button">▶ / 一時停止</button></div><div class="small" id="videoStudyStatus">動画を読み込んでください。</div></div><div class="grid"><div class="card"><div class="recordInputHeader"><div class="title">高速入力</div><button class="btn" id="recordCompactToggle" type="button" aria-pressed="false">省スペース表示</button></div><div class="label">SET</div><div class="buttons" id="sets"></div><div class="label">相手ローテ</div><div class="buttons" id="rots"></div><div class="rotationActions"><button class="btn" id="setStart">今の位置を開始位置に設定</button></div><div class="rotationNote" id="rotationNote">このセットの開始ローテを選択してください。</div><div class="label">① 相手選手</div><div class="recordCourtRow"><div class="lineupCourt" id="lineupCourt"><div class="lineupNet"></div><div class="lineupAttackLine"></div><div class="lineupPositionGrid" id="playerButtons"></div></div><div class="recordCourtActions"><button class="btn nextRot" id="nextRot">次ローテ →</button><button class="btn" id="toggleRecordSub" type="button" aria-pressed="false">⇄ 選手交代</button></div></div><div class="recordSub"><div class="small recordSubGuide" id="recordSubGuide" hidden>交代する選手の丸をタップしてください。</div><div id="recordSubPanel" hidden><label>OUT <select id="recordSubOut"></select></label><label>IN <select id="recordSubIn"></select></label><button class="btn on" id="confirmRecordSub" type="button">交代を確定</button><button class="btn" id="cancelRecordSub" type="button">閉じる</button></div><div class="small" id="recordLineupStatus"></div></div><div class="label">② トス/攻撃種類</div><div class="attackScroll"><div class="buttons" id="attacks"></div></div><div class="recordOutcomeRow"><div class="recordOutcomeCol"><div class="label">③ 結果</div><div class="buttons" id="results"></div></div><div class="recordOutcomeCol"><div class="label">球質</div><div class="buttons ballTypeButtons" id="ballTypes"></div></div></div><details class="recDetails" id="recDetails"><summary>レセプション（任意） <span id="recStatus">未記録</span></summary><div class="buttons" id="recs"></div><div class="small">選ばなければ未記録。次のプレーには引き継ぎません。</div></details><button class="save" id="save">フリー線を保存</button><div class="buttons" style="margin-top:6px"><button class="btn" id="undo">↩ 取消</button><button class="btn" id="clear">線クリア</button></div></div>
 <div class="card"><div class="row"><div><b id="matchName">相手チーム</b> <span class="small" id="state"></span></div><div><b id="count">0</b> plays</div></div><div class="recordSelectionSummary" id="recordSelectionSummary" aria-live="polite">選手・攻撃種類・結果を選択してください</div><div class="courtWrap"><div class="lineLegend"><span class="lineRed">━ 決定</span><span class="lineBlue">━ 継続・被ブロック</span><span class="lineGray">━ ミス</span><span>〰 フェイント・軟打</span></div><div class="courtMode"><button class="btn on" id="tapMode">36分割タップ</button><button class="btn" id="freeMode">フリー線</button></div><div class="court" id="court"><canvas id="canvas"></canvas><div class="landingGrid" id="landingGrid"></div></div><div class="hint" id="hint">④ 着地点をタップすると自動保存！ 選手・攻撃・結果は次のプレーにも引き継ぎます。</div></div><details class="recentDetails"><summary>スパイク記録の確認・修正 <span class="small">（タップして表示・編集）</span></summary><div class="recent" id="recent"></div></details></div></div></div></div></section>
 <dialog id="editPlayDialog" class="editPlayDialog" aria-labelledby="editPlayTitle">
@@ -404,7 +404,7 @@ body.ipadStandalone header{top:0}
 <label hidden>新しい相手校・試合名 <input id="newMatchName" placeholder="例：○○高校 10/15"></label>
 <button class="btn on" id="createMatch" hidden>新しい試合を作成</button>
 </div>
-<div class="matchNote" id="matchManagerStatus">現在の試合の記録を表示しています。</div>
+<div class="matchNote" id="matchManagerStatus">現在の試合の記録を表示しています。</div><div class="matchManager" style="margin-top:10px"><label>削除する保存済み試合 <select id="deleteMatchSelector" aria-label="削除する試合"></select></label><button class="btn err" id="deleteSavedMatch" type="button">選んだ試合を削除</button></div><div class="small" id="deleteMatchHint">現在記録中の試合は削除できません。</div>
 <div class="field"><div class="label">相手校名</div><input id="oppName"></div><div class="field"><div class="label">選手登録（背番号・最大18人、カンマ区切り）</div><input id="nums"></div><div class="field"><div class="label">リベロの背番号（カンマ区切り・任意）</div><input id="liberoNums" placeholder="例：7,12"></div></div><div class="card"><div class="title">スターティング6人・途中交代</div><div class="small">リベロを除く6人を選びます。途中交代は出場中の選手と交代選手を指定してください。過去の記録は変更されません。</div><div class="small" style="margin-top:8px">青い丸をタップして、各ポジションの背番号を選んでください。（ネット側：4・5・6）</div><div class="starterCourt"><div class="starterNet"></div><div id="starterSelectors" class="starterSelectors"></div></div><button class="btn on" id="saveStarters" type="button">スターティング6人を保存</button><div class="substitutionControls"><label>OUT <select id="subOut"></select></label><label>IN <select id="subIn"></select></label><button class="btn" id="doSub" type="button">選手交代</button></div><div class="small" id="lineupStatus"></div><div class="small" id="subHistory"></div><button class="btn" id="apply">設定を反映</button><p class="small">記録はこのiPadのブラウザ内に自動保存されます。</p><div class="ipadHelp"><b>📱 iPadでアプリとして使う</b><p>Safariでこのページを開き、「共有」→「ホーム画面に追加」を選んでください。追加したアイコンから起動し、iPadを横向きにすると3列の記録画面になります。</p><p>左右の入力欄はそれぞれ上下にスクロールできます。記録は端末内に保存されるため、定期的に「JSONバックアップ」を保存してください。</p></div></div><div class="card"><div class="title">試合データの保存・読み込み</div><div class="buttons" style="align-items:center;margin:8px 0;gap:8px"><button class="btn on" id="saveCurrentMatch" type="button">💾 この試合を保存</button><button class="btn" id="startNewFromSettings" type="button">＋ 新規試合</button><label class="btn" style="cursor:pointer">📂 試合を読み込む<input id="importMatchFiles" type="file" accept=".json,application/json" multiple hidden></label></div><div class="small" id="simpleFileStatus">保存はVideo Lab・Opponent Scout共通のJSON形式。読み込み時は既存の試合を残して追加します。</div><details style="margin-top:12px"><summary style="cursor:pointer;font-weight:800">詳細設定（過去試合の書き出し・全試合バックアップ・CSV・削除）</summary><div class="buttons" style="margin-top:10px"><button class="btn" id="csv">CSV出力</button><button class="btn" id="backup" hidden>旧形式で現在の試合を保存</button><select id="singleExportMatch" aria-label="保存する試合"></select><button class="btn" id="exportSingleMatch">選択した過去試合を保存</button><button class="btn" id="backupAllMatches">全試合をJSON保存</button><label hidden>全試合JSON読込<input id="importAllMatches" type="file" accept="application/json" hidden></label><label hidden>旧形式のJSON復元<input id="restore" type="file" accept="application/json" hidden></label><button class="btn err" id="wipe">現在の試合の記録を消去</button></div></details></div><div class="card"><div class="title">攻撃ボタンの配置・並び替え</div>
 <div class="attackColumnControl"><label for="attackColumns">横に並べるボタン数</label><select id="attackColumns"></select></div>
 <div class="small">1〜18個から選べます。画面に収まらないときは横にスクロールできます。</div>
@@ -1310,12 +1310,42 @@ function renderMatchSelector(){
     selector.appendChild(opt)
   });
   selector.value=matchIndex.activeId;renderSingleExportMatches();
+  const deleteSelector=$('deleteMatchSelector'),previous=deleteSelector.value;
+  deleteSelector.replaceChildren();
+  matchIndex.matches.filter(m=>m.id!==matchIndex.activeId).forEach(m=>{const option=document.createElement('option');option.value=m.id;option.textContent=(m.date?m.date+' ':'')+m.name;deleteSelector.appendChild(option)});
+  if([...deleteSelector.options].some(o=>o.value===previous))deleteSelector.value=previous;
+  $('deleteSavedMatch').disabled=deleteSelector.options.length===0;
+  $('deleteMatchHint').textContent=deleteSelector.options.length?'現在記録中の試合は削除できません。削除前に試合名と記録件数を確認します。':'削除できる過去試合はありません。';
   $('matchManagerStatus').textContent='保存済み '+matchIndex.matches.length+'試合 ／ 現在：'+(activeMatch()?.name||db.settings.name);updateQuickMatchLabel()
 }
 $('matchSelector').onchange=()=>{
   const id=$('matchSelector').value;
   if(id!==matchIndex.activeId&&confirm('この試合に切り替えますか？現在の記録は保存されます。'))switchMatch(id);
   else $('matchSelector').value=matchIndex.activeId
+};
+$('deleteSavedMatch').onclick=()=>{
+  const id=$('deleteMatchSelector').value;
+  if(!id||id===matchIndex.activeId){alert('現在記録している試合は削除できません。');return}
+  const target=matchIndex.matches.find(m=>m.id===id);if(!target)return;
+  let data;try{data=JSON.parse(localStorage.getItem(MATCH_DATA_PREFIX+id)||'null')}catch(e){data=null}
+  const count=Array.isArray(data?.plays)?data.plays.length:0;
+  if(!confirm('「'+target.name+'」を削除しますか？\\n記録：'+count+'件\\nこの試合の動画時刻も削除され、元に戻せません。ほかの試合には影響しません。'))return;
+  if(id===matchIndex.activeId)return;
+  const timesKey='opponentScoutVideoTimesV1';
+  try{
+    const newMatches=matchIndex.matches.filter(m=>m.id!==id);
+    const times=JSON.parse(localStorage.getItem(timesKey)||'{}');
+    Object.keys(times).filter(key=>key.startsWith(id+':')).forEach(key=>delete times[key]);
+    const updated={...matchIndex,matches:newMatches};
+    // Write updated index and timestamps before removing the archived data.
+    localStorage.setItem(MATCH_INDEX_KEY,JSON.stringify(updated));
+    try{localStorage.setItem(timesKey,JSON.stringify(times))}
+    catch(err){localStorage.setItem(MATCH_INDEX_KEY,JSON.stringify(matchIndex));throw err}
+    matchIndex=updated;
+    localStorage.removeItem(MATCH_DATA_PREFIX+id);
+    renderMatchSelector();
+    alert('「'+target.name+'」を削除しました。');
+  }catch(err){console.error(err);alert('試合を削除できませんでした。保存容量や端末設定を確認してください。')}
 };
 $('createMatch').onclick=()=>{
   const name=$('newMatchName').value.trim();
