@@ -87,9 +87,9 @@ function draw(){
  }
  el('line',{x1:0,y1:450,x2:450,y2:450,stroke:'#172c33','stroke-width':6});
 
- rows.forEach(({p})=>{if(!p.a||!p.b)return;const pts=[p.a,p.b,...(p.c?[p.c]:[])];if(pts.some(q=>!Number.isFinite(q.x)||!Number.isFinite(q.y)))return;
+ rows.forEach(({p})=>{if(!p.a||!p.b)return;const pts=p.result==='被ブロック'?(p.c?[p.a,p.b,p.c]:(()=>{const landing={x:p.b.x,y:p.b.y>=.5?1-p.b.y:p.b.y};return [p.a,{x:(p.a.x+landing.x)/2,y:.5},landing]})()):[p.a,p.b,...(p.c?[p.c]:[])];if(pts.some(q=>!Number.isFinite(q.x)||!Number.isFinite(q.y)))return;
  el('polyline',{points:pts.map(q=>(q.x*450)+','+(q.y*900)).join(' '),fill:'none',stroke:p.result==='決定'?'#b72f40':p.result==='ミス'?'#6b737c':'#2d6bcb','stroke-width':2.5,opacity:.65,'stroke-linecap':'round'});
- el('circle',{cx:p.b.x*450,cy:p.b.y*900,r:3,fill:p.result==='決定'?'#b72f40':'#305a75'});
+ el('circle',{cx:pts[pts.length-1].x*450,cy:pts[pts.length-1].y*900,r:3,fill:p.result==='決定'?'#b72f40':'#305a75'});
  })
 }
 function renderVideos(selected){
