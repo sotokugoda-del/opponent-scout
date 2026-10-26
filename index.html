@@ -466,8 +466,20 @@ function createNewMatch(name){
 }
 db.settings.liberos=Array.isArray(db.settings.liberos)?db.settings.liberos:[];db.settings.starters=Array.isArray(db.settings.starters)?db.settings.starters:[];db.settings.lineup=Array.isArray(db.settings.lineup)?db.settings.lineup:[];db.settings.substitutions=Array.isArray(db.settings.substitutions)?db.settings.substitutions:[];
 db.plays.forEach(p=>{if(/^R[1-6]$/.test(p.rot))p.rot='S'+p.rot.slice(1)});localStorage.setItem(KEY,JSON.stringify(db));let st={set:1,rot:'S1',player:db.settings.players[0],type:'アタック',rec:'未記録',attack:'レフト',ballType:'強打',result:'決定'},pending=null,drag=null,reboundBase=null;const colors=['#ef4444','#1d8cff','#17a862','#f2b632','#ad62ff','#ff7b22','#00b8b8','#e94e9c','#7cc043','#8b6bff','#ff5252','#2ab7ca'];const DEFAULT_POS={ '2段':{x:.12,y:.22},'R２段':{x:.88,y:.22},'レフト':{x:.08,y:.12},'4つ':{x:.16,y:.28},'2番':{x:.84,y:.28},'AQ':{x:.42,y:.16},'BQ':{x:.28,y:.14},'CQ':{x:.66,y:.14},'オニ':{x:.82,y:.66},'BA':{x:.50,y:.76},'セ':{x:.52,y:.20},'ライト':{x:.92,y:.12},'RB':{x:.84,y:.82},'CB':{x:.50,y:.88},'LB':{x:.16,y:.82},'タテ':{x:.50,y:.19},'Sブロ':{x:.30,y:.22},'Mブロ':{x:.50,y:.22},'Lブロ':{x:.70,y:.22}};
-db.settings.attackPositions=db.settings.attackPositions||{};
-Object.entries(DEFAULT_POS).forEach(([name,p])=>{if(!db.settings.attackPositions[name])db.settings.attackPositions[name]={...p}});db.settings.setStarts=db.settings.setStarts||{};db.settings.currentRotations=db.settings.currentRotations||{};
+// One shared set of attack starting positions for every match on this device.
+const GLOBAL_ATTACK_POS_KEY='opponentScoutGlobalAttackPositionsV1';
+function validAttackPositions(value){
+ return value&&typeof value==='object'&&!Array.isArray(value)&&
+  Object.entries(DEFAULT_POS).every(([name])=>value[name]&&
+   Number.isFinite(value[name].x)&&Number.isFinite(value[name].y)&&
+   value[name].x>=0&&value[name].x<=1&&value[name].y>=0&&value[name].y<=1);
+}
+let sharedAttackPositions=null;
+try{const value=JSON.parse(localStorage.getItem(GLOBAL_ATTACK_POS_KEY)||'null');if(validAttackPositions(value))sharedAttackPositions=value}catch(e){console.warn('共有打点を読み込めませんでした',e)}
+db.settings.attackPositions=JSON.parse(JSON.stringify(sharedAttackPositions||db.settings.attackPositions||{}));
+Object.entries(DEFAULT_POS).forEach(([name,p])=>{if(!db.settings.attackPositions[name])db.settings.attackPositions[name]={...p}});
+function saveGlobalAttackPositions(){localStorage.setItem(GLOBAL_ATTACK_POS_KEY,JSON.stringify(db.settings.attackPositions))}
+db.settings.setStarts=db.settings.setStarts||{};db.settings.currentRotations=db.settings.currentRotations||{};
 // Resume at the most recently recorded set/rotation when reopening an imported match.
 const lastRecorded=db.plays.slice().reverse().find(p=>Number.isInteger(Number(p.set))&&Number(p.set)>=1&&Number(p.set)<=5);
 if(lastRecorded){st.set=Number(lastRecorded.set);if(db.settings.players.includes(Number(lastRecorded.player)))st.player=Number(lastRecorded.player)}
@@ -1500,7 +1512,7 @@ $('resetAttackOrder').onclick=()=>{
   $('attackOrderHint').textContent='初期状態に戻しました。'
 };
 renderAttackOrderEditor();
-function renderPosEditor(){let pc=$('posCourt');if(!pc)return;pc.innerHTML='';Object.entries(db.settings.attackPositions).forEach(([name,p])=>{let d=document.createElement('div');d.className='posDot'+(['BA','RB','CB','LB'].includes(name)?' back':'');d.textContent=name;d.style.left=(p.x*100)+'%';d.style.top=(p.y*100)+'%';d.onpointerdown=e=>{e.preventDefault();d.setPointerCapture(e.pointerId)};d.onpointermove=e=>{if(!d.hasPointerCapture(e.pointerId))return;let r=pc.getBoundingClientRect();p.x=Math.max(0.035,Math.min(.965,(e.clientX-r.left)/r.width));p.y=Math.max(0.025,Math.min(.975,(e.clientY-r.top)/r.height));d.style.left=(p.x*100)+'%';d.style.top=(p.y*100)+'%'};pc.appendChild(d)})}if($('savePos'))$('savePos').onclick=()=>{saveDB();$('savePos').textContent='保存しました ✓';setTimeout(()=>$('savePos').textContent='この位置を保存',1200)};if($('resetPos'))$('resetPos').onclick=()=>{if(confirm('攻撃位置を初期位置に戻しますか？')){db.settings.attackPositions=JSON.parse(JSON.stringify(DEFAULT_POS));saveDB();renderPosEditor()}};renderPosEditor();document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));$(b.dataset.page).classList.add('on');if(b.dataset.page==='analysis')renderAnalysis();if(b.dataset.page==='players')renderPlayers()});let framePending=false;
+function renderPosEditor(){let pc=$('posCourt');if(!pc)return;pc.innerHTML='';Object.entries(db.settings.attackPositions).forEach(([name,p])=>{let d=document.createElement('div');d.className='posDot'+(['BA','RB','CB','LB'].includes(name)?' back':'');d.textContent=name;d.style.left=(p.x*100)+'%';d.style.top=(p.y*100)+'%';d.onpointerdown=e=>{e.preventDefault();d.setPointerCapture(e.pointerId)};d.onpointermove=e=>{if(!d.hasPointerCapture(e.pointerId))return;let r=pc.getBoundingClientRect();p.x=Math.max(0.035,Math.min(.965,(e.clientX-r.left)/r.width));p.y=Math.max(0.025,Math.min(.975,(e.clientY-r.top)/r.height));d.style.left=(p.x*100)+'%';d.style.top=(p.y*100)+'%'};pc.appendChild(d)})}if($('savePos'))$('savePos').onclick=()=>{saveGlobalAttackPositions();saveDB();$('savePos').textContent='保存しました ✓';setTimeout(()=>$('savePos').textContent='この位置を保存',1200)};if($('resetPos'))$('resetPos').onclick=()=>{if(confirm('攻撃位置を初期位置に戻しますか？')){db.settings.attackPositions=JSON.parse(JSON.stringify(DEFAULT_POS));saveGlobalAttackPositions();saveDB();renderPosEditor()}};renderPosEditor();document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.querySelectorAll('.page').forEach(x=>x.classList.remove('on'));$(b.dataset.page).classList.add('on');if(b.dataset.page==='analysis')renderAnalysis();if(b.dataset.page==='players')renderPlayers()});let framePending=false;
 function redrawVisibleCourts(){
   if(framePending)return;framePending=true;
   requestAnimationFrame(()=>{
