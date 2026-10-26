@@ -930,7 +930,10 @@ function drawPlayerCourses(){
   const player=$('playerCoursePlayer').value,rot=$('playerCourseRot').value,attack=$('playerCourseAttack').value,result=$('playerCourseResult').value;
   const plays=db.plays.filter(p=>p.type==='アタック'&&(player==='all'||String(p.player)===player)&&(rot==='all'||p.rot===rot)&&(attack==='all'||p.attack===attack)&&(result==='all'||p.result===result));
   const k=plays.filter(p=>p.result==='決定').length,e=plays.filter(p=>p.result==='ミス').length,b=plays.filter(p=>p.result==='被ブロック').length;
-  $('playerCourseSummary').textContent=`対象 ${plays.length}本 ／ 決定 ${k}本 ／ 決定率 ${pct(k,plays.length)} ／ 攻撃効果率 ${pct(k-e-b,plays.length)}`;
+  const blockouts=plays.filter(p=>p.ballType==='ブロックアウト');
+  const boDir=p=>p.c?.x<0?'左外':p.c?.x>1?'右外':p.c?.y>1?'奥':p.c?.y<0?'手前':'不明';
+  const boCounts=Object.entries(blockouts.reduce((o,p)=>(o[boDir(p)]=(o[boDir(p)]||0)+1,o),{})).map(([name,n])=>name+' '+n+'本').join('／');
+  $('playerCourseSummary').textContent=`対象 ${plays.length}本 ／ 決定 ${k}本 ／ 決定率 ${pct(k,plays.length)} ／ 攻撃効果率 ${pct(k-e-b,plays.length)} ／ ブロックアウト ${blockouts.length}本${boCounts?'（'+boCounts+'）':''}`;
   requestAnimationFrame(()=>{
     if(!$('players').classList.contains('on'))return;
     renderAnalysis36Grid($('players'));
